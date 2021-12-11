@@ -3,5 +3,5 @@ using System.Collections.Generic;
 
 namespace FashopBackend.Graphql.Categories
 {
-    public record EditCategoryInput(int id, string name, IEnumerable<int> productIds);
+    public record EditCategoryInput(int Id, string Name, IEnumerable<int> ProductIds);
 }

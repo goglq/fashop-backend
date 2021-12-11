@@ -1,11 +1,10 @@
-﻿using FashopBackend.Core.Aggregate.CategoryAggregate;
+﻿using System.Collections.Generic;
+using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Interfaces;
+using FashopBackend.Infrastructure.Data;
 using HotChocolate;
 using HotChocolate.Types;
-using System;
-using System.Collections.Generic;
-
 namespace FashopBackend.Graphql.Types
 {
     public class ProductType : ObjectType<Product>
@@ -14,19 +13,29 @@ namespace FashopBackend.Graphql.Types
         {
             base.Configure(descriptor);
 
+            Resolvers resolvers = new Resolvers();
+
             descriptor.Description("Represents product model");
 
-            //descriptor
-            //    .Field(p => p.Categories)
-            //    .ResolveWith<Resolvers>(p => p.GetCategories(default!, default))
-            //    .Description("This is list of categories for this product");
+            descriptor
+                .Field(p => p.Id)
+                .Description("This is unique identifier for product");
+            
+            descriptor
+                .Field(p => p.Id)
+                .Description("This is a name of product");
+            
+            descriptor
+                .Field(p => p.Categories)
+                .Resolve(ctx => resolvers.GetCategories(ctx.Parent<Product>(), ctx.Service<ICategoryService>()))
+                .Description("This is list of categories for this product");
         }
 
         private class Resolvers
         {
-            public IEnumerable<Category> GetCategories(Product product, [Service] ICategoryRepository service)
+            public IEnumerable<Category> GetCategories(Product product, [Service] ICategoryService service)
             {
-                return service.GetAll();
+                return service.GetCategoryByProduct(product);
             }
         }
     }

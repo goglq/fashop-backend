@@ -1,11 +1,10 @@
 ﻿using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Interfaces;
-using FashopBackend.Core.Services;
 using HotChocolate;
 using HotChocolate.Data;
 using System.Collections.Generic;
-using System.Linq;
+using HotChocolate.Types;
 
 namespace FashopBackend.Graphql
 {
@@ -22,5 +21,7 @@ namespace FashopBackend.Graphql
         public IEnumerable<Category> GetCategories([Service] ICategoryService service) => service.GetAllCategories();
 
         public Category GetCategory(int id, [Service] ICategoryService service) => service.GetCategoryById(id);
+        
+        
     }
 }

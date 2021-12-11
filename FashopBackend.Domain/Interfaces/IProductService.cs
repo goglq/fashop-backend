@@ -14,11 +14,12 @@ namespace FashopBackend.Core.Interfaces
 
         IEnumerable<Product> GetProductsWithId(params int[] ids);
 
+        IEnumerable<Product> GetProductByCategory(Category category);
+
         Product GetProductById(int id);
 
         Task<Product> CreateProduct(Product product);
-
-        Product AddCategoryToProduct(int id, Category category);
-
+        
+        Product EditProduct(int inputId, string inputName, IEnumerable<Category> categories);
     }
 }

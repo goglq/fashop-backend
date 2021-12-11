@@ -24,6 +24,13 @@ namespace FashopBackend.Graphql
             return new AddProductPayload(product);
         }
 
+        public EditProductPayload EditProduct(EditCategoryInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
+        {
+            IEnumerable<Category> categories = categoryService.GetCategoryByIds(input.ProductIds.ToArray());
+            Product product = productService.EditProduct(input.Id, input.Name, categories);
+            return new EditProductPayload(product);
+        }
+
         public async Task<AddCategoryPayload> AddCategory(AddCategoryInput input, [Service]ICategoryService service)
         {
             var category = new Category()
@@ -38,8 +45,8 @@ namespace FashopBackend.Graphql
 
         public EditCategoryPayload EditCategory(EditCategoryInput input, [Service] ICategoryService categoryService, [Service] IProductService productService)
         {
-            IEnumerable<Product> products = productService.GetProductsWithId(input.productIds.ToArray());
-            Category category = categoryService.EditCategory(input.id, input.name, products);
+            IEnumerable<Product> products = productService.GetProductsWithId(input.ProductIds.ToArray());
+            Category category = categoryService.EditCategory(input.Id, input.Name, products);
             return new EditCategoryPayload(category);
         }
     }

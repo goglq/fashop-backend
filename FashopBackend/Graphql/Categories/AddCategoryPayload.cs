@@ -2,5 +2,5 @@
 
 namespace FashopBackend.Graphql.Categories
 {
-    public record AddCategoryPayload(Category category);
+    public record AddCategoryPayload(Category Category);
 }

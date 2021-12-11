@@ -28,6 +28,11 @@ namespace FashopBackend.Core.Services
             return _productRepository.GetAll(product => ids.Contains(product.Id));
         }
 
+        public IEnumerable<Product> GetProductByCategory(Category category)
+        {
+            return _productRepository.GetAll(product => product.Categories.Contains(category));
+        }
+
         public Product GetProductById(int id)
         {
             return _productRepository.Get(id);
@@ -40,9 +45,16 @@ namespace FashopBackend.Core.Services
             return product;
         }
 
-        public Product AddCategoryToProduct(int id, Category category)
+        public Product EditProduct(int inputId, string inputName, IEnumerable<Category> categories)
         {
-            throw new NotImplementedException();
+            Product product = _productRepository.Get(inputId);
+            product.Name = inputName;
+            product.Categories = categories.ToList();
+            
+            _productRepository.Update(product);
+            _productRepository.Save();
+
+            return product;
         }
     }
 }

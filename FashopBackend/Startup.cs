@@ -45,8 +45,8 @@ namespace FashopBackend
 
             services
                 .AddGraphQLServer()
-                .AddMutationType<Mutation>()
                 .AddQueryType<Query>()
+                .AddMutationType<Mutation>()
                 .AddType<CategoryType>()
                 .AddType<ProductType>()
                 .AddFiltering()

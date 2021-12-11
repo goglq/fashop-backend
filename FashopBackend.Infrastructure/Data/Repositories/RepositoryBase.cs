@@ -11,23 +11,19 @@ namespace FashopBackend.Infrastructure.Data.Repositories
 {
     public class RepositoryBase<T> : IRepository<T> where T : class, IAggregateRoot
     {
-        private FashopContext _context;
+        private readonly FashopContext _context;
 
-        private DbSet<T> _dbSet;
-
-        protected DbSet<T> DbSet => _dbSet;
+        protected DbSet<T> DbSet { get; }
 
         public RepositoryBase(FashopContext context)
         {
             _context = context;
-            _dbSet = _context.Set<T>();
+            DbSet = _context.Set<T>();
         }
 
         public List<T> GetAll(Expression<Func<T, bool>> filter)
         {
-            if(filter == null)
-                return DbSet.ToList();
-            return DbSet.Where(filter).ToList();
+            return filter == null ? DbSet.ToList() : DbSet.Where(filter).ToList();
         }
 
         public T Get(int id)

@@ -11,6 +11,10 @@ namespace FashopBackend.Core.Interfaces
     public interface ICategoryService
     {
         IEnumerable<Category> GetAllCategories();
+        
+        IEnumerable<Category> GetCategoryByIds(params int[] ids);
+        
+        IEnumerable<Category> GetCategoryByProduct(Product product);
 
         Category GetCategoryById(int id);
 
