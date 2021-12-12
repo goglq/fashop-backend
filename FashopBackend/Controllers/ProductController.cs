@@ -25,14 +25,14 @@ namespace FashopBackend.Controllers
         [HttpGet]
         public IEnumerable<Product> Get()
         {
-            return _productService.GetAllProducts();
+            return _productService.GetAll();
         }
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
         public Product Get(int id)
         {
-            return _productService.GetProductById(id);
+            return _productService.GetById(id);
         }
 
         // POST api/<ProductController>

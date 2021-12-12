@@ -12,13 +12,13 @@ namespace FashopBackend.Graphql
     {
         [UseFiltering]
         [UseSorting]
-        public IEnumerable<Product> GetProducts([Service] IProductService service) => service.GetAllProducts();
+        public IEnumerable<Product> GetProducts([Service] IProductService service) => service.GetAll();
 
-        public Product GetProduct(int id, [Service]IProductService service) => service.GetProductById(id);
+        public Product GetProduct(int id, [Service]IProductService service) => service.GetById(id);
 
         [UseFiltering]
         [UseSorting]
-        public IEnumerable<Category> GetCategories([Service] ICategoryService service) => service.GetAllCategories();
+        public IEnumerable<Category> GetCategories([Service] ICategoryService service) => service.GetAll();
 
         public Category GetCategory(int id, [Service] ICategoryService service) => service.GetCategoryById(id);
         

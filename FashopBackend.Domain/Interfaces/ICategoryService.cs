@@ -10,16 +10,16 @@ namespace FashopBackend.Core.Interfaces
 {
     public interface ICategoryService
     {
-        IEnumerable<Category> GetAllCategories();
+        IEnumerable<Category> GetAll();
         
-        IEnumerable<Category> GetCategoryByIds(params int[] ids);
+        IEnumerable<Category> GetByIds(params int[] ids);
         
-        IEnumerable<Category> GetCategoryByProduct(Product product);
+        IEnumerable<Category> GetByProduct(Product product);
 
         Category GetCategoryById(int id);
 
-        Task<Category> CreateCategory(Category product);
+        Task<Category> Create(Category product);
 
-        Category EditCategory(int id, string name, IEnumerable<Product> products);
+        Category Edit(int id, string name, IEnumerable<Product> products);
     }
 }

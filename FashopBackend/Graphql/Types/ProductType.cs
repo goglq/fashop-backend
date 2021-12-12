@@ -35,7 +35,7 @@ namespace FashopBackend.Graphql.Types
         {
             public IEnumerable<Category> GetCategories(Product product, [Service] ICategoryService service)
             {
-                return service.GetCategoryByProduct(product);
+                return service.GetByProduct(product);
             }
         }
     }

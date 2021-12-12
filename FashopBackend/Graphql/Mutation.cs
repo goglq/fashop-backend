@@ -1,4 +1,5 @@
-﻿using FashopBackend.Core.Aggregate.CategoryAggregate;
+﻿using System;
+using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Interfaces;
 using FashopBackend.Graphql.Categories;
@@ -12,23 +13,32 @@ namespace FashopBackend.Graphql
 {
     public class Mutation
     {
-        public async Task<AddProductPayload> AddProduct(AddProductInput input, [Service] IProductService service)
+        public async Task<AddProductPayload> AddProduct(AddProductInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
         {
-            var product = new Product()
+            IEnumerable<Category> categories = categoryService.GetAll();
+
+            Product product = new Product()
             {
-                Name = input.Name
+                Name = input.Name,
+                Categories = categories.ToList()
             };
 
-            await service.CreateProduct(product);
+            await productService.Create(product);
 
             return new AddProductPayload(product);
         }
 
-        public EditProductPayload EditProduct(EditCategoryInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
+        public EditProductPayload EditProduct(EditProductInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
         {
-            IEnumerable<Category> categories = categoryService.GetCategoryByIds(input.ProductIds.ToArray());
-            Product product = productService.EditProduct(input.Id, input.Name, categories);
+            IEnumerable<Category> categories = categoryService.GetByIds(input.CategoryIds.ToArray());
+            Product product = productService.Edit(input.Id, input.Name, categories);
             return new EditProductPayload(product);
+        }
+
+        public DeleteProductPayload DeleteProduct(DeleteProductInput input, [Service] IProductService service)
+        {
+            int id = service.Delete(input.Id);
+            return new DeleteProductPayload(id);
         }
 
         public async Task<AddCategoryPayload> AddCategory(AddCategoryInput input, [Service]ICategoryService service)
@@ -38,16 +48,21 @@ namespace FashopBackend.Graphql
                 Name = input.Name
             };
 
-            await service.CreateCategory(category);
+            await service.Create(category);
 
             return new AddCategoryPayload(category);
         }
 
         public EditCategoryPayload EditCategory(EditCategoryInput input, [Service] ICategoryService categoryService, [Service] IProductService productService)
         {
-            IEnumerable<Product> products = productService.GetProductsWithId(input.ProductIds.ToArray());
-            Category category = categoryService.EditCategory(input.Id, input.Name, products);
+            IEnumerable<Product> products = productService.GetWithId(input.ProductIds.ToArray());
+            Category category = categoryService.Edit(input.Id, input.Name, products);
             return new EditCategoryPayload(category);
+        }
+        
+        public DeleteCategoryPayload DeleteCategory(DeleteCategoryInput input, [Service] ICategoryService service)
+        {
+            throw new NotImplementedException();
         }
     }
 }

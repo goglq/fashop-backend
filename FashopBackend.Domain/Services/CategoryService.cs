@@ -16,23 +16,23 @@ namespace FashopBackend.Core.Services
             _categoryRepository = categoryRepository;
         }
 
-        public IEnumerable<Category> GetAllCategories() => _categoryRepository.GetAll();
+        public IEnumerable<Category> GetAll() => _categoryRepository.GetAll();
 
-        public IEnumerable<Category> GetCategoryByProduct(Product product)
+        public IEnumerable<Category> GetByProduct(Product product)
         {
             return _categoryRepository.GetAll(category => category.Products.Contains(product));
         }
 
         public Category GetCategoryById(int id) => _categoryRepository.Get(id);
 
-        public async Task<Category> CreateCategory(Category category)
+        public async Task<Category> Create(Category category)
         {
             await _categoryRepository.Create(category);
             await _categoryRepository.SaveAsync();
             return category;
         }
 
-        public Category EditCategory(int id, string name, IEnumerable<Product> products)
+        public Category Edit(int id, string name, IEnumerable<Product> products)
         {
             Category category = _categoryRepository.Get(id);
             
@@ -45,7 +45,7 @@ namespace FashopBackend.Core.Services
             return category;
         }
 
-        public IEnumerable<Category> GetCategoryByIds(params int[] ids)
+        public IEnumerable<Category> GetByIds(params int[] ids)
         {
             IEnumerable<Category> categories = _categoryRepository.GetAll(category => ids.Contains(category.Id));
             return categories;

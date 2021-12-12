@@ -1,10 +1,8 @@
 ﻿using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FashopBackend.Core.Services
@@ -18,34 +16,34 @@ namespace FashopBackend.Core.Services
             _productRepository = productRepository;
         }
 
-        public IEnumerable<Product> GetAllProducts()
+        public IEnumerable<Product> GetAll()
         {
             return _productRepository.GetAll();
         }
 
-        public IEnumerable<Product> GetProductsWithId(params int[] ids)
+        public IEnumerable<Product> GetWithId(params int[] ids)
         {
             return _productRepository.GetAll(product => ids.Contains(product.Id));
         }
 
-        public IEnumerable<Product> GetProductByCategory(Category category)
+        public IEnumerable<Product> GetByCategory(Category category)
         {
             return _productRepository.GetAll(product => product.Categories.Contains(category));
         }
 
-        public Product GetProductById(int id)
+        public Product GetById(int id)
         {
             return _productRepository.Get(id);
         }
 
-        public async Task<Product> CreateProduct(Product product)
+        public async Task<Product> Create(Product product)
         {
             await _productRepository.Create(product);
             await _productRepository.SaveAsync();
             return product;
         }
 
-        public Product EditProduct(int inputId, string inputName, IEnumerable<Category> categories)
+        public Product Edit(int inputId, string inputName, IEnumerable<Category> categories)
         {
             Product product = _productRepository.Get(inputId);
             product.Name = inputName;
@@ -55,6 +53,14 @@ namespace FashopBackend.Core.Services
             _productRepository.Save();
 
             return product;
+        }
+
+        public int Delete(int inputId)
+        {
+            Product product = _productRepository.Get(inputId);
+            _productRepository.Remove(product);
+            _productRepository.Save();
+            return product.Id;
         }
     }
 }
