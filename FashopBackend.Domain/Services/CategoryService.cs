@@ -45,6 +45,14 @@ namespace FashopBackend.Core.Services
             return category;
         }
 
+        public int Delete(int inputId)
+        {
+            Category category = _categoryRepository.Get(inputId);
+            _categoryRepository.Remove(category);
+            _categoryRepository.Save();
+            return category.Id;
+        }
+
         public IEnumerable<Category> GetByIds(params int[] ids)
         {
             IEnumerable<Category> categories = _categoryRepository.GetAll(category => ids.Contains(category.Id));

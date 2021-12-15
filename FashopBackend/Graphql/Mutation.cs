@@ -62,7 +62,8 @@ namespace FashopBackend.Graphql
         
         public DeleteCategoryPayload DeleteCategory(DeleteCategoryInput input, [Service] ICategoryService service)
         {
-            throw new NotImplementedException();
+            int id = service.Delete(input.Id);
+            return new DeleteCategoryPayload(id);
         }
     }
 }

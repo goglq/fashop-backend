@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FashopBackend.Infrastructure.Data;
 
 namespace FashopBackend
 {
@@ -13,14 +14,19 @@ namespace FashopBackend
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Console.WriteLine("Starting Fashop Backend Server");
+            CreateHostBuilder(args)
+                .Build()
+                .MigrateDatabase<FashopContext>()
+                .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    var port = Environment.GetEnvironmentVariable("PORT");
+                    webBuilder.UseStartup<Startup>().UseUrls("http://*:" + port);
                 });
     }
 }

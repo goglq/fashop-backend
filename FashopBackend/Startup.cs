@@ -42,8 +42,15 @@ namespace FashopBackend
                     .AllowAnyMethod()
                 )
             );
-            
-            services.AddDbContext<FashopContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            string dbConnectionString =
+                $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" + 
+                $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                $"User Id={Environment.GetEnvironmentVariable("DB_USER")};" +
+                $"Password={Environment.GetEnvironmentVariable("DB_PASS")}";
+
+            services.AddDbContext<FashopContext>(opt => opt.UseNpgsql(dbConnectionString));
 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
