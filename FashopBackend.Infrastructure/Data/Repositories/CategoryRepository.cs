@@ -13,5 +13,10 @@ namespace FashopBackend.Infrastructure.Data.Repositories
         {
 
         }
+
+        public override void Update(Category entity)
+        {
+            
+        }
     }
 }

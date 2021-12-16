@@ -22,7 +22,12 @@
       "launchBrowser": false,
       "launchUrl": "graphql",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_NAME": "fashop_db",
+        "DB_USER": "fashop_user",
+        "DB_PASS": "123"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "https://localhost:5001;http://localhost:5000"

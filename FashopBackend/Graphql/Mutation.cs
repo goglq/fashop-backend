@@ -15,7 +15,7 @@ namespace FashopBackend.Graphql
     {
         public async Task<AddProductPayload> AddProduct(AddProductInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
         {
-            IEnumerable<Category> categories = categoryService.GetAll();
+            IEnumerable<Category> categories = categoryService.GetByIds(input.CategoryIds.ToArray());
 
             Product product = new Product()
             {
@@ -55,8 +55,7 @@ namespace FashopBackend.Graphql
 
         public EditCategoryPayload EditCategory(EditCategoryInput input, [Service] ICategoryService categoryService, [Service] IProductService productService)
         {
-            IEnumerable<Product> products = productService.GetWithId(input.ProductIds.ToArray());
-            Category category = categoryService.Edit(input.Id, input.Name, products);
+            Category category = categoryService.Edit(input.Id, input.Name);
             return new EditCategoryPayload(category);
         }
         

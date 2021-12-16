@@ -20,7 +20,7 @@ namespace FashopBackend.Core.Interfaces
 
         Task<Category> Create(Category product);
 
-        Category Edit(int id, string name, IEnumerable<Product> products);
+        Category Edit(int id, string name);
         
         int Delete(int inputId);
     }

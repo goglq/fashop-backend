@@ -32,13 +32,11 @@ namespace FashopBackend.Core.Services
             return category;
         }
 
-        public Category Edit(int id, string name, IEnumerable<Product> products)
+        public Category Edit(int id, string name)
         {
             Category category = _categoryRepository.Get(id);
             
             category.Name = name;
-            category.Products = products.ToList();
-            
             _categoryRepository.Update(category);
             _categoryRepository.Save();
             

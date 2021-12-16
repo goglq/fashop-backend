@@ -23,6 +23,9 @@ namespace FashopBackend.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //TODO: Add CategoryProduct class to make safe updates.
+            //https://stackoverflow.com/questions/42993860/entity-framework-core-update-many-to-many
+            //https://www.thereformedprogrammer.net/updating-many-to-many-relationships-in-entity-framework-core/
             modelBuilder.Entity<Category>()
                     .HasMany(c => c.Products)
                     .WithMany(p => p.Categories)

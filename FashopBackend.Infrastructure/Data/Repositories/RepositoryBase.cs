@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FashopBackend.Infrastructure.Data.Repositories
 {
-    public class RepositoryBase<T> : IRepository<T> where T : class, IAggregateRoot
+    public abstract class RepositoryBase<T> : IRepository<T> where T : class, IAggregateRoot
     {
         private readonly FashopContext _context;
 
@@ -36,7 +36,7 @@ namespace FashopBackend.Infrastructure.Data.Repositories
             await DbSet.AddAsync(entity);
         }
 
-        public void Update(T entity)
+        public virtual void Update(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
         }
