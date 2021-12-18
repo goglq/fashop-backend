@@ -4,6 +4,7 @@ using FashopBackend.Core.Interfaces;
 using HotChocolate;
 using HotChocolate.Data;
 using System.Collections.Generic;
+using FashopBackend.Core.Aggregate.BrandAggregate;
 using HotChocolate.Types;
 
 namespace FashopBackend.Graphql
@@ -21,7 +22,11 @@ namespace FashopBackend.Graphql
         public IEnumerable<Category> GetCategories([Service] ICategoryService service) => service.GetAll();
 
         public Category GetCategory(int id, [Service] ICategoryService service) => service.GetCategoryById(id);
-        
-        
+
+        [UseFiltering]
+        [UseSorting]
+        public IEnumerable<Brand> GetBrands([Service] IBrandRepository repository) => repository.GetAll();
+
+        public Brand GetBrand(int id, [Service] IBrandRepository repository) => repository.Get(id);
     }
 }

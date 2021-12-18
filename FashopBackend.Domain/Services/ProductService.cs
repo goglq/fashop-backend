@@ -45,9 +45,10 @@ namespace FashopBackend.Core.Services
 
         public Product Edit(int inputId, string inputName, IEnumerable<Category> categories)
         {
-            Product product = _productRepository.Get(inputId);
+            Product product = _productRepository.GetIncluded(inputId);
             product.Name = inputName;
-            product.Categories = categories.ToList();
+            product.Categories.Clear();
+            product.Categories.AddRange(categories);
             
             _productRepository.Update(product);
             _productRepository.Save();

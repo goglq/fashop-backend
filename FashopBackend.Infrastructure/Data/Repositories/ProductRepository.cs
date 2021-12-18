@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace FashopBackend.Infrastructure.Data.Repositories
 {
@@ -15,5 +16,9 @@ namespace FashopBackend.Infrastructure.Data.Repositories
 
         }
 
+        public Product GetIncluded(int id)
+        {
+            return DbSet.Include(p => p.Categories).FirstOrDefault(p => p.Id == id);
+        }
     }
 }

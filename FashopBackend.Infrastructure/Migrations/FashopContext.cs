@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.UserAggregate;
 
 namespace FashopBackend.Infrastructure.Data
 {
@@ -14,7 +16,10 @@ namespace FashopBackend.Infrastructure.Data
         public DbSet<Product> Products { get; set; } 
 
         public DbSet<Category> Categories { get; set; }
-
+        
+        public DbSet<Brand> Brands { get; set; }
+        
+        public DbSet<User> Users { get; set; }
 
         public FashopContext(DbContextOptions<FashopContext> options) : base(options)
         {
@@ -23,9 +28,6 @@ namespace FashopBackend.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //TODO: Add CategoryProduct class to make safe updates.
-            //https://stackoverflow.com/questions/42993860/entity-framework-core-update-many-to-many
-            //https://www.thereformedprogrammer.net/updating-many-to-many-relationships-in-entity-framework-core/
             modelBuilder.Entity<Category>()
                     .HasMany(c => c.Products)
                     .WithMany(p => p.Categories)
@@ -33,6 +35,14 @@ namespace FashopBackend.Infrastructure.Data
                 "products_categories",
                 j => j.HasOne<Product>().WithMany().HasForeignKey("product_id"),
                 j => j.HasOne<Category>().WithMany().HasForeignKey("category_id"));
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique(true);
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.IsEmailVerified)
+                .HasDefaultValue(false);
         }
 
         public override void Dispose()

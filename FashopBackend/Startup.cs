@@ -20,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Shared;
 
 namespace FashopBackend
 {
@@ -35,6 +37,8 @@ namespace FashopBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<TokenSettings>(Configuration.GetSection("TokenSettings"));
+            
             services.AddCors(options => options.AddPolicy(name: "AllowAll", builder => 
                 builder
                     .AllowAnyHeader()
@@ -44,16 +48,17 @@ namespace FashopBackend
             );
 
             string dbConnectionString =
-                $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" + 
-                $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
-                $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
-                $"User Id={Environment.GetEnvironmentVariable("DB_USER")};" +
-                $"Password={Environment.GetEnvironmentVariable("DB_PASS")}";
+                $"Server={Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost"};" + 
+                $"Port={Environment.GetEnvironmentVariable("DB_PORT") ?? "5432"};" +
+                $"Database={Environment.GetEnvironmentVariable("DB_NAME") ?? "fashop_db"};" +
+                $"User Id={Environment.GetEnvironmentVariable("DB_USER") ?? "fashop_user"};" +
+                $"Password={Environment.GetEnvironmentVariable("DB_PASS") ?? "123"}";
 
             services.AddDbContext<FashopContext>(opt => opt.UseNpgsql(dbConnectionString));
 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IBrandRepository, BrandRepository>();
 
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();

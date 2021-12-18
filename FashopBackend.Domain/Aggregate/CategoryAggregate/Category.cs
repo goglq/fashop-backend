@@ -13,10 +13,10 @@ namespace FashopBackend.Core.Aggregate.CategoryAggregate
     [Table("categories")]
     public class Category : IAggregateRoot
     {
-        [Key]
+        [Key, Column("id")]
         public int Id { get; set; }
 
-        [Required]
+        [Required, Column("name")]
         public string Name { get; set; }
 
         public List<Product> Products { get; set; } = new();
