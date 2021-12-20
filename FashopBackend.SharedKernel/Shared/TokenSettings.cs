@@ -1,4 +1,4 @@
-﻿namespace FashopBackend.Shared;
+﻿namespace FashopBackend.SharedKernel.Shared;
 
 public class TokenSettings
 {

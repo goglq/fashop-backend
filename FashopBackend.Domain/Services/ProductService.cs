@@ -15,12 +15,7 @@ namespace FashopBackend.Core.Services
         {
             _productRepository = productRepository;
         }
-
-        public IEnumerable<Product> GetAll()
-        {
-            return _productRepository.GetAll();
-        }
-
+        
         public IEnumerable<Product> GetWithId(params int[] ids)
         {
             return _productRepository.GetAll(product => ids.Contains(product.Id));
@@ -29,11 +24,6 @@ namespace FashopBackend.Core.Services
         public IEnumerable<Product> GetByCategory(Category category)
         {
             return _productRepository.GetAll(product => product.Categories.Contains(category));
-        }
-
-        public Product GetById(int id)
-        {
-            return _productRepository.Get(id);
         }
 
         public async Task<Product> Create(Product product)

@@ -16,14 +16,10 @@ namespace FashopBackend.Core.Services
             _categoryRepository = categoryRepository;
         }
 
-        public IEnumerable<Category> GetAll() => _categoryRepository.GetAll();
-
         public IEnumerable<Category> GetByProduct(Product product)
         {
             return _categoryRepository.GetAll(category => category.Products.Contains(product));
         }
-
-        public Category GetCategoryById(int id) => _categoryRepository.Get(id);
 
         public async Task<Category> Create(Category category)
         {

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
+using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.SharedKernel.Interfaces;
 
 namespace FashopBackend.Core.Aggregate.UserAggregate;
@@ -19,4 +21,12 @@ public class User : IAggregateRoot
     
     [Required, Column("email_verified")]
     public bool IsEmailVerified { get; set; }
+    
+    [Required, Column("token")]
+    public string Token { get; set; }
+    
+    [Required, Column("roleId")]
+    public int RoleId { get; set; }
+    
+    public Role Role { get; set; }
 }

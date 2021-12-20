@@ -1,6 +1,6 @@
 ﻿namespace FashopBackend.SharedKernel.Shared;
 
-public class AccessTokenSettings
+public class AccessTokenSettings : TokenSettings
 {
     
 }

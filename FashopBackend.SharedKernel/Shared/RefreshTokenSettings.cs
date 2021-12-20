@@ -1,6 +1,6 @@
 ﻿namespace FashopBackend.SharedKernel.Shared;
 
-public class RefreshTokenSettings
+public class RefreshTokenSettings : TokenSettings
 {
     
 }

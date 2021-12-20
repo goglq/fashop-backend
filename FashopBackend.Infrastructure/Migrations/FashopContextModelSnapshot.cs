@@ -84,6 +84,28 @@ namespace FashopBackend.Infrastructure.Migrations
                     b.ToTable("products");
                 });
 
+            modelBuilder.Entity("FashopBackend.Core.Aggregate.RoleAggregate.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("roles");
+                });
+
             modelBuilder.Entity("FashopBackend.Core.Aggregate.UserAggregate.User", b =>
                 {
                     b.Property<int>("Id")
@@ -109,10 +131,20 @@ namespace FashopBackend.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("roleId");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("text")
+                        .HasColumnName("token");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("users");
                 });
@@ -141,6 +173,17 @@ namespace FashopBackend.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("FashopBackend.Core.Aggregate.UserAggregate.User", b =>
+                {
+                    b.HasOne("FashopBackend.Core.Aggregate.RoleAggregate.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("products_categories", b =>

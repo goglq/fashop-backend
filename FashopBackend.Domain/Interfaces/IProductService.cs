@@ -10,13 +10,10 @@ namespace FashopBackend.Core.Interfaces
 {
     public interface IProductService
     {
-        IEnumerable<Product> GetAll();
-
         IEnumerable<Product> GetWithId(params int[] ids);
 
         IEnumerable<Product> GetByCategory(Category category);
 
-        Product GetById(int id);
 
         Task<Product> Create(Product product);
         

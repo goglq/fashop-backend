@@ -1,6 +1,8 @@
-﻿namespace FashopBackend.Core.Aggregate.RoleAggregate;
+﻿using FashopBackend.SharedKernel.Interfaces;
 
-public class IRoleRepository
+namespace FashopBackend.Core.Aggregate.RoleAggregate;
+
+public interface IRoleRepository : IRepository<Role>
 {
     
 }

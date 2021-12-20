@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 
 namespace FashopBackend.Infrastructure.Data
@@ -20,6 +21,8 @@ namespace FashopBackend.Infrastructure.Data
         public DbSet<Brand> Brands { get; set; }
         
         public DbSet<User> Users { get; set; }
+        
+        public DbSet<Role> Roles { get; set; }
 
         public FashopContext(DbContextOptions<FashopContext> options) : base(options)
         {
@@ -38,7 +41,7 @@ namespace FashopBackend.Infrastructure.Data
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
-                .IsUnique(true);
+                .IsUnique();
 
             modelBuilder.Entity<User>()
                 .Property(u => u.IsEmailVerified)
@@ -47,6 +50,10 @@ namespace FashopBackend.Infrastructure.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Token)
                 .IsRequired(false);
+
+            modelBuilder.Entity<Role>()
+                .HasIndex(r => r.Name)
+                .IsUnique();
         }
 
         public override void Dispose()
