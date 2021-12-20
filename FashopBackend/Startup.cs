@@ -8,20 +8,18 @@ using FashopBackend.Infrastructure.Data;
 using FashopBackend.Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using FashopBackend.Core.Aggregate.BrandAggregate;
-using FashopBackend.Shared;
+using FashopBackend.Core.Aggregate.RoleAggregate;
+using FashopBackend.Core.Aggregate.UserAggregate;
+using FashopBackend.SharedKernel.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FashopBackend
 {
@@ -34,10 +32,10 @@ namespace FashopBackend
             Configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<TokenSettings>(Configuration.GetSection("TokenSettings"));
+            services.Configure<AccessTokenSettings>(Configuration.GetSection("AccessTokenSettings"));
+            services.Configure<RefreshTokenSettings>(Configuration.GetSection("RefreshTokenSettings"));
             
             services.AddCors(options => options.AddPolicy(name: "AllowAll", builder => 
                 builder
@@ -46,6 +44,21 @@ namespace FashopBackend
                     .AllowAnyMethod()
                 )
             );
+
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidIssuer = Configuration.GetSection("AccessTokenSettings").GetValue<string>("Issuer"),
+                        ValidateIssuer = true,
+                        ValidAudience = Configuration.GetSection("AccessTokenSettings").GetValue<string>("Audience"),
+                        ValidateAudience = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AccessTokenSettings").GetValue<string>("Key"))),
+                        ValidateIssuerSigningKey = true
+                    };
+                });
 
             string dbConnectionString =
                 $"Server={Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost"};" + 
@@ -56,30 +69,39 @@ namespace FashopBackend
 
             services.AddDbContext<FashopContext>(opt => opt.UseNpgsql(dbConnectionString));
 
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IBrandRepository, BrandRepository>();
-
+            
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
 
             services
                 .AddGraphQLServer()
-                .AddQueryType<Query>()
-                .AddMutationType<Mutation>()
+                .AddQueryType<QueryType>()
+                .AddMutationType<MutationType>()
+                .AddAuthorization()
+                .AddType<UserType>()
+                .AddType<BrandType>()
                 .AddType<CategoryType>()
                 .AddType<ProductType>()
                 .AddFiltering()
                 .AddSorting();
+                
 
             services.AddControllers();
+
+            services.AddRazorPages();
+
             //services.AddSwaggerGen(c =>
             //{
             //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "FashopBackend", Version = "v1" });
             //});
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -95,15 +117,16 @@ namespace FashopBackend
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapGraphQL();
-                endpoints.MapControllers();
             });
 
-            app.UseGraphQLVoyager("/graphql-voyager/");
+            app.UseGraphQLVoyager("/graphql-voyager");
         }
     }
 }

@@ -43,6 +43,10 @@ namespace FashopBackend.Infrastructure.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.IsEmailVerified)
                 .HasDefaultValue(false);
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Token)
+                .IsRequired(false);
         }
 
         public override void Dispose()

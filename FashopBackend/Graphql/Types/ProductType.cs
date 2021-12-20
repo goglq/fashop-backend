@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Interfaces;
@@ -18,12 +19,21 @@ namespace FashopBackend.Graphql.Types
             descriptor.Description("Represents product model");
 
             descriptor
+                .Field(p => p.BrandId)
+                .Ignore();
+
+            descriptor
                 .Field(p => p.Id)
                 .Description("This is unique identifier for product");
             
             descriptor
                 .Field(p => p.Id)
                 .Description("This is a name of product");
+            
+            descriptor
+                .Field(p => p.Brand)
+                .Resolve(ctx => resolvers.GetBrand(ctx.Parent<Product>(), ctx.Service<IBrandRepository>()))
+                .Description("This is brand of product");
             
             descriptor
                 .Field(p => p.Categories)
@@ -36,6 +46,11 @@ namespace FashopBackend.Graphql.Types
             public IEnumerable<Category> GetCategories(Product product, [Service] ICategoryService service)
             {
                 return service.GetByProduct(product);
+            }
+
+            public Brand GetBrand(Product product, [Service] IBrandRepository brandRepository)
+            {
+                return brandRepository.Get(product.BrandId);
             }
         }
     }

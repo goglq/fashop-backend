@@ -11,10 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.RoleAggregate;
+using FashopBackend.Core.Aggregate.TokenAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
+using FashopBackend.Core.Services;
 using FashopBackend.Graphql.Brands;
 using FashopBackend.Graphql.Users;
-using FashopBackend.Shared;
+using FashopBackend.SharedKernel.Shared;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using BC = BCrypt.Net.BCrypt;
@@ -32,7 +35,8 @@ namespace FashopBackend.Graphql
             Product product = new Product()
             {
                 Name = input.Name,
-                Categories = categories.ToList()
+                Categories = categories.ToList(),
+                BrandId = input.BrandId
             };
 
             await productService.Create(product);
@@ -111,9 +115,10 @@ namespace FashopBackend.Graphql
 
         #region User Mutations
 
-        public async Task<RegisterUserPayload> RegisterUser(RegsiterUserInput input, [Service] IUserRepository userRepository)
+        public async Task<RegisterUserPayload> RegisterUser(RegsiterUserInput input, [Service] IUserRepository userRepository, [Service]  IRoleRepository roleRepository)
         {
             User candidate = userRepository.GetAll().Find(u => u.Email == input.Email);
+            Role role = roleRepository.GetAll().First(u => u.Name == "user");
 
             if (candidate is not null)
                 throw new Exception("User already exists");
@@ -124,35 +129,38 @@ namespace FashopBackend.Graphql
             {
                 Email = input.Email,
                 Password = hashedPassword,
+                RoleId = role.Id,
                 IsEmailVerified = false
             };
+
+            await userRepository.Create(user);
+            await userRepository.SaveAsync();
 
             return new RegisterUserPayload(user);
         }
         
-        public LoginUserPayload LoginUser(LoginUserInput input, [Service]IOptions<TokenSettings> tokenSettings, [Service] IUserRepository userRepository)
+        public LoginUserPayload LoginUser(
+            LoginUserInput input,
+            [Service] IUserRepository userRepository, 
+            [Service] ITokenService tokenService,
+            [Service] IOptions<AccessTokenSettings> accessTokenSettings,
+            [Service] IOptions<RefreshTokenSettings> refreshTokenSettings
+            )
         {
-            User user = userRepository.GetAll().Find(u => u.Email == input.Email);
+            User user = userRepository.GetUsersWithRoles().Find(u => u.Email == input.Email);
             
             if (user is null) 
                 throw new Exception("Not authorized");
 
             if (!BC.Verify(input.Password, user.Password))
                 throw new Exception("Invalid Password");
-            
-            SymmetricSecurityKey symmetricSecurityKey = new (Encoding.UTF8.GetBytes(tokenSettings.Value.Key));
-            SigningCredentials credentials = new (symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
- 
-            JwtSecurityToken jwtToken = new (
-                issuer: tokenSettings.Value.Issuer,
-                audience: tokenSettings.Value.Audience,
-                expires: DateTime.Now.AddMinutes(20),
-                signingCredentials: credentials
-            );
- 
-            string token = new JwtSecurityTokenHandler().WriteToken(jwtToken);
 
-            return new LoginUserPayload(token);
+            Tokens tokens = tokenService.GenerateToken(user.Id, user.Email, user.Role.Name, accessTokenSettings.Value, refreshTokenSettings.Value);
+            user.Token = tokens.RefreshToken;
+            userRepository.Update(user);
+            userRepository.Save();
+
+            return new LoginUserPayload(tokens);
         }
 
         #endregion

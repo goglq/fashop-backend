@@ -1,5 +1,6 @@
-﻿using FashopBackend.Core.Aggregate.UserAggregate;
+﻿using FashopBackend.Core.Aggregate.TokenAggregate;
+using FashopBackend.Core.Aggregate.UserAggregate;
 
 namespace FashopBackend.Graphql.Users;
 
-public record LoginUserPayload(string Token);
+public record LoginUserPayload(Tokens Tokens);
