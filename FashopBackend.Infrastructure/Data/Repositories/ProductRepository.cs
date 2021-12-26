@@ -18,7 +18,10 @@ namespace FashopBackend.Infrastructure.Data.Repositories
 
         public Product GetIncluded(int id)
         {
-            return DbSet.Include(p => p.Categories).FirstOrDefault(p => p.Id == id);
+            return DbSet
+                .Include(p => p.Categories)
+                .Include(p => p.Brand)
+                .FirstOrDefault(p => p.Id == id);
         }
     }
 }

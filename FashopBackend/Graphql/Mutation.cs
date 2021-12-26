@@ -18,6 +18,7 @@ using FashopBackend.Core.Services;
 using FashopBackend.Graphql.Brands;
 using FashopBackend.Graphql.Users;
 using FashopBackend.SharedKernel.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using BC = BCrypt.Net.BCrypt;
@@ -44,10 +45,11 @@ namespace FashopBackend.Graphql
             return new AddProductPayload(product);
         }
 
-        public EditProductPayload EditProduct(EditProductInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
+        public EditProductPayload EditProduct(EditProductInput input, [Service] IProductService productService, [Service] ICategoryService categoryService, [Service] IBrandRepository repository)
         {
             IEnumerable<Category> categories = categoryService.GetByIds(input.CategoryIds.ToArray());
-            Product product = productService.Edit(input.Id, input.Name, categories);
+            Brand brand = repository.Get(input.BrandId);
+            Product product = productService.Edit(input.Id, input.Name, brand, categories);
             return new EditProductPayload(product);
         }
 
@@ -102,13 +104,21 @@ namespace FashopBackend.Graphql
             return new AddBrandPayload(brand);
         }
 
-        public EditBrandPayload AddBrand(EditBrandInput input, [Service] IBrandRepository repository)
+        public EditBrandPayload EditBrand(EditBrandInput input, [Service] IBrandRepository repository)
         {
             Brand brand = repository.Get(input.Id);
             brand.Name = input.Name;
             repository.Update(brand);
             repository.Save();
             return new EditBrandPayload(brand);
+        }
+        
+        public DeleteBrandPayload DeleteBrand(DeleteBrandInput input, [Service] IBrandRepository repository)
+        {
+            Brand brand = repository.Get(input.BrandId);
+            repository.Remove(brand);
+            repository.Save();
+            return new DeleteBrandPayload(brand.Id);
         }
 
         #endregion
@@ -144,7 +154,8 @@ namespace FashopBackend.Graphql
             [Service] IUserRepository userRepository, 
             [Service] ITokenService tokenService,
             [Service] IOptions<AccessTokenSettings> accessTokenSettings,
-            [Service] IOptions<RefreshTokenSettings> refreshTokenSettings
+            [Service] IOptions<RefreshTokenSettings> refreshTokenSettings,
+            [Service] IHttpContextAccessor httpContextAccessor
             )
         {
             User user = userRepository.GetUsersWithRoles().Find(u => u.Email == input.Email);
@@ -157,6 +168,15 @@ namespace FashopBackend.Graphql
 
             Tokens tokens = tokenService.GenerateToken(user.Id, user.Email, user.Role.Name, accessTokenSettings.Value, refreshTokenSettings.Value);
             user.Token = tokens.RefreshToken;
+            
+            if (httpContextAccessor.HttpContext is not null)
+            {
+                httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokens.RefreshToken,new CookieOptions()
+                {
+                    HttpOnly= true,
+                    Expires = DateTimeOffset.FromUnixTimeSeconds(60 * 5)
+                });
+            }
             userRepository.Update(user);
             userRepository.Save();
 

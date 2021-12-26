@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FashopBackend.Core.Aggregate.BrandAggregate;
 
 namespace FashopBackend.Core.Interfaces
 {
@@ -14,11 +15,11 @@ namespace FashopBackend.Core.Interfaces
 
         IEnumerable<Product> GetByCategory(Category category);
 
-
         Task<Product> Create(Product product);
         
-        Product Edit(int inputId, string inputName, IEnumerable<Category> categories);
+        Product Edit(int inputId, string inputName, Brand brand, IEnumerable<Category> categories);
         
         int Delete(int inputId);
+        IEnumerable<Product> GetByBrand(Brand parent);
     }
 }

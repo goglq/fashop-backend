@@ -40,4 +40,4 @@ msbuild.wrn
 # Docker
 docker-compose.yaml
 
-**/appsettings.json
+# Configuration

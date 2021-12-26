@@ -3,5 +3,5 @@
 namespace FashopBackend.Graphql.Products
 {
 
-    public record EditProductInput(int Id, string Name, IEnumerable<int> CategoryIds);
+    public record EditProductInput(int Id, string Name, int BrandId, IEnumerable<int> CategoryIds);
 }

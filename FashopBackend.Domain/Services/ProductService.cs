@@ -4,6 +4,7 @@ using FashopBackend.Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FashopBackend.Core.Aggregate.BrandAggregate;
 
 namespace FashopBackend.Core.Services
 {
@@ -33,7 +34,7 @@ namespace FashopBackend.Core.Services
             return product;
         }
 
-        public Product Edit(int inputId, string inputName, IEnumerable<Category> categories)
+        public Product Edit(int inputId, string inputName, Brand brand, IEnumerable<Category> categories)
         {
             Product product = _productRepository.GetIncluded(inputId);
             product.Name = inputName;
@@ -52,6 +53,11 @@ namespace FashopBackend.Core.Services
             _productRepository.Remove(product);
             _productRepository.Save();
             return product.Id;
+        }
+
+        public IEnumerable<Product> GetByBrand(Brand parent)
+        {
+            return _productRepository.GetAll(product => product.BrandId == parent.Id);
         }
     }
 }

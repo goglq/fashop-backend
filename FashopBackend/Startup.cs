@@ -17,6 +17,7 @@ using System.Text;
 using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
+using FashopBackend.Graphql.Errors;
 using FashopBackend.SharedKernel.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -44,6 +45,8 @@ namespace FashopBackend
                     .AllowAnyMethod()
                 )
             );
+            
+            services.AddHttpContextAccessor();
 
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -90,7 +93,8 @@ namespace FashopBackend
                 .AddType<ProductType>()
                 .AddFiltering()
                 .AddSorting();
-                
+
+            services.AddErrorFilter<GraphQLErrorFilter>();
 
             services.AddControllers();
 

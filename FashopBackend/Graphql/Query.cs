@@ -1,4 +1,5 @@
-﻿using FashopBackend.Core.Aggregate.CategoryAggregate;
+﻿using System;
+using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using HotChocolate;
 using HotChocolate.Data;
@@ -9,6 +10,7 @@ using FashopBackend.Core.Aggregate.TokenAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 using FashopBackend.Core.Interfaces;
 using FashopBackend.SharedKernel.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace FashopBackend.Graphql
@@ -40,15 +42,21 @@ namespace FashopBackend.Graphql
         public User GetUser(int id, [Service] IUserRepository repository) => repository.Get(id);
 
         public string AccessToken(
-            string refreshToken, 
             [Service] IUserRepository repository, 
             [Service] ITokenService tokenService, 
             [Service] IOptions<AccessTokenSettings> accessTokenSettings,
-            [Service] IOptions<RefreshTokenSettings> refreshTokenSettings
-            )
+            [Service] IOptions<RefreshTokenSettings> refreshTokenSettings,
+            [Service] IHttpContextAccessor httpContextAccessor
+        )
         {
+            if (httpContextAccessor.HttpContext is null)
+            {
+                throw new Exception("HttpContext is null");
+            }
+            string refreshToken = httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
+
             User user = repository.GetUserByToken(refreshToken);
-            if (user.Token != refreshToken)
+            if (user is null)
                 throw new AuthenticationException("Refresh Tokens are not matched");
         
             Tokens tokens = tokenService.GenerateToken(user.Id, user.Email, user.Role.Name, accessTokenSettings.Value, refreshTokenSettings.Value);
