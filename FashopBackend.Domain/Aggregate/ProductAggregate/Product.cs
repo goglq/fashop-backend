@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 
 namespace FashopBackend.Core.Aggregate.ProductAggregate
 {
@@ -17,11 +18,19 @@ namespace FashopBackend.Core.Aggregate.ProductAggregate
         [Required, Column("name")]
         public string Name { get; set; }
         
+        [Required, Column("description")]
+        public string Description { get; set; }
+        
+        [Required, Column("price", TypeName = "money")]
+        public double Price { get; set; }
+        
         [Column("brand_id")]
         public int BrandId { get; set; }
         
         public Brand Brand { get; set; }
 
         public List<Category> Categories { get; set; } = new();
+
+        public List<ProductImage> ProductImages { get; set; } = new();
     }
 }

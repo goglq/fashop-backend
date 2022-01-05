@@ -1,6 +1,14 @@
-﻿namespace FashopBackend.Infrastructure.Data.Repositories;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 
-public class ProductImageRepository
+namespace FashopBackend.Infrastructure.Data.Repositories;
+
+public class ProductImageRepository : RepositoryBase<ProductImage>, IProductImageRepository
 {
-    
+    public ProductImageRepository(FashopContext context) : base(context)
+    {
+    }
 }

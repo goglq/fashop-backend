@@ -21,6 +21,7 @@ namespace FashopBackend.Infrastructure.Data.Repositories
             return DbSet
                 .Include(p => p.Categories)
                 .Include(p => p.Brand)
+                .Include(p => p.ProductImages)
                 .FirstOrDefault(p => p.Id == id);
         }
     }

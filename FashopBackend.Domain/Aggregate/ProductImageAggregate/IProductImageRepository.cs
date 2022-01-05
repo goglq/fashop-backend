@@ -1,6 +1,8 @@
-﻿namespace FashopBackend.Core.Aggregate.ProductImageAggregate;
+﻿using FashopBackend.SharedKernel.Interfaces;
 
-public interface IProductImageRepository
+namespace FashopBackend.Core.Aggregate.ProductImageAggregate;
+
+public interface IProductImageRepository : IRepository<ProductImage>
 {
     
 }

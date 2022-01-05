@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 
 namespace FashopBackend.Core.Interfaces
 {
@@ -17,7 +18,8 @@ namespace FashopBackend.Core.Interfaces
 
         Task<Product> Create(Product product);
         
-        Product Edit(int inputId, string inputName, Brand brand, IEnumerable<Category> categories);
+        Product Edit(int inputId, string inputName, string description, double price, Brand brand,
+            IEnumerable<Category> categories, IEnumerable<ProductImage> productImages);
         
         int Delete(int inputId);
         IEnumerable<Product> GetByBrand(Brand parent);

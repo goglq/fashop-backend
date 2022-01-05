@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 
 namespace FashopBackend.Core.Services
 {
@@ -34,12 +35,17 @@ namespace FashopBackend.Core.Services
             return product;
         }
 
-        public Product Edit(int inputId, string inputName, Brand brand, IEnumerable<Category> categories)
+        public Product Edit(int inputId, string inputName, string description, double price, Brand brand,
+            IEnumerable<Category> categories, IEnumerable<ProductImage> productImages)
         {
             Product product = _productRepository.GetIncluded(inputId);
             product.Name = inputName;
+            product.Description = description;
+            product.Price = price;
             product.Categories.Clear();
             product.Categories.AddRange(categories);
+            product.ProductImages.Clear();
+            product.ProductImages.AddRange(productImages);
             
             _productRepository.Update(product);
             _productRepository.Save();
