@@ -2,6 +2,7 @@
 using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.CategoryAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Interfaces;
 using FashopBackend.Infrastructure.Data;
 using HotChocolate;
@@ -39,6 +40,11 @@ namespace FashopBackend.Graphql.Types
                 .Field(p => p.Categories)
                 .Resolve(ctx => resolvers.GetCategories(ctx.Parent<Product>(), ctx.Service<ICategoryService>()))
                 .Description("This is list of categories for this product");
+
+            descriptor
+                .Field(_ => _.ProductImages)
+                .Resolve(ctx => resolvers.GetProductImages(ctx.Parent<Product>(), ctx.Service<IProductImageRepository>()))
+                .Description("This is list of images of this product.");
         }
 
         private class Resolvers
@@ -51,6 +57,11 @@ namespace FashopBackend.Graphql.Types
             public Brand GetBrand(Product product, [Service] IBrandRepository brandRepository)
             {
                 return brandRepository.Get(product.BrandId);
+            }
+
+            public IEnumerable<ProductImage> GetProductImages(Product product, [Service] IProductImageRepository productImageRepository)
+            {
+                return productImageRepository.GetAll(productImage => productImage.ProductId == product.Id);
             }
         }
     }

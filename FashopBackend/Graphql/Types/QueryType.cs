@@ -19,5 +19,9 @@ public class QueryType : ObjectType<Query>
         descriptor
             .Field(_ => _.GetUsers(default))
             .Authorize(new []{"admin"});
+
+        descriptor
+            .Field(_ => _.RefreshToken(default))
+            .Authorize();
     }
 }

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Text;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 using FashopBackend.Graphql.Errors;
@@ -77,6 +78,7 @@ namespace FashopBackend
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IBrandRepository, BrandRepository>();
+            services.AddScoped<IProductImageRepository, ProductImageRepository>();
             
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IProductService, ProductService>();

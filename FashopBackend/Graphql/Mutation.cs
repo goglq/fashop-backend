@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.TokenAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
@@ -49,7 +50,9 @@ namespace FashopBackend.Graphql
         {
             IEnumerable<Category> categories = categoryService.GetByIds(input.CategoryIds.ToArray());
             Brand brand = repository.Get(input.BrandId);
-            Product product = productService.Edit(input.Id, input.Name, brand, categories);
+            IEnumerable<ProductImage> productImages =
+                input.ImageUrls.Select(imageUrl => new ProductImage() {Url = imageUrl});
+            Product product = productService.Edit(input.Id, input.Name, input.Descriptions, input.Price, brand, categories, productImages);
             return new EditProductPayload(product);
         }
 
@@ -174,14 +177,20 @@ namespace FashopBackend.Graphql
                 httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokens.RefreshToken,new CookieOptions()
                 {
                     HttpOnly= true,
-                    Expires = DateTimeOffset.FromUnixTimeSeconds(60 * 5)
+                    Expires = DateTimeOffset.Now.AddDays(1)
                 });
+                Console.WriteLine(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
             }
             userRepository.Update(user);
             userRepository.Save();
 
             return new LoginUserPayload(tokens);
         }
+
+        // public LogoutUserPayload Logout()
+        // {
+        //     return new LogoutUserPayload();
+        // }
 
         #endregion
     }

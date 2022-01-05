@@ -62,5 +62,26 @@ namespace FashopBackend.Graphql
             Tokens tokens = tokenService.GenerateToken(user.Id, user.Email, user.Role.Name, accessTokenSettings.Value, refreshTokenSettings.Value);
             return tokens.AccessToken;
         }
+
+        public string RefreshToken([Service]IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor is null)
+            {
+                return "http context accessor is null";
+            }
+            if (httpContextAccessor.HttpContext is null)
+            {
+                return "context is null";
+            }
+            foreach(string key in httpContextAccessor.HttpContext.Request.Cookies.Keys)
+            {
+                Console.WriteLine(key);
+            }
+            if (httpContextAccessor.HttpContext.Request.Cookies["refreshToken"] is null)
+            {
+                return "refreshToken is not in cookie";
+            }
+            return httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
+        }
     }
 }
