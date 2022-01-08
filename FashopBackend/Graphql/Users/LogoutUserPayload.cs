@@ -1,3 +1,3 @@
 ﻿namespace FashopBackend.Graphql.Users;
 
-public record LogoutUserPayload();
+public record LogoutUserPayload(int UserId);

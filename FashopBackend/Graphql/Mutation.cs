@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.BrandImageAggregate;
 using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.TokenAggregate;
@@ -37,8 +38,11 @@ namespace FashopBackend.Graphql
             Product product = new Product()
             {
                 Name = input.Name,
+                Description = input.Descriptions,
+                Price = input.Price,
                 Categories = categories.ToList(),
-                BrandId = input.BrandId
+                BrandId = input.BrandId,
+                ProductImages = input.ImageUrls.Select(imageUrl => new ProductImage() {Url = imageUrl}).ToList()
             };
 
             await productService.Create(product);
@@ -98,7 +102,12 @@ namespace FashopBackend.Graphql
         {
             Brand brand = new Brand()
             {
-                Name = input.Name
+                Name = input.Name,
+                BrandImage = new BrandImage()
+                {
+                    Thumbnail = input.Thumbnail,
+                    Header = input.Header
+                }
             };
             
             await repository.Create(brand);
@@ -179,7 +188,6 @@ namespace FashopBackend.Graphql
                     HttpOnly= true,
                     Expires = DateTimeOffset.Now.AddDays(1)
                 });
-                Console.WriteLine(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
             }
             userRepository.Update(user);
             userRepository.Save();
@@ -187,10 +195,24 @@ namespace FashopBackend.Graphql
             return new LoginUserPayload(tokens);
         }
 
-        // public LogoutUserPayload Logout()
-        // {
-        //     return new LogoutUserPayload();
-        // }
+        public LogoutUserPayload Logout([Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new NullReferenceException("HttpContext is null");
+            
+            User user = userRepository.GetUserByToken(
+                httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            if (user is null)
+                throw new NullReferenceException("User not found by token");
+            
+            user.Token = "";
+            
+            userRepository.Update(user);
+            userRepository.Save();
+
+            return new LogoutUserPayload(user.Id);
+        }
 
         #endregion
     }

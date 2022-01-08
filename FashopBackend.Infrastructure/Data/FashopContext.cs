@@ -26,7 +26,7 @@ namespace FashopBackend.Infrastructure.Data
 
         public FashopContext(DbContextOptions<FashopContext> options) : base(options)
         {
-
+            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,6 +54,10 @@ namespace FashopBackend.Infrastructure.Data
             modelBuilder.Entity<Role>()
                 .HasIndex(r => r.Name)
                 .IsUnique();
+
+            modelBuilder.Entity<Role>().HasData(new Role() { Id = 1, Name = "admin"});
+            modelBuilder.Entity<Role>().HasData(new Role() { Id = 2, Name = "user"});
+            //modelBuilder.Entity<Role>().HasData(new Role() {Id = 3, Name = "seller"});
         }
 
         public override void Dispose()

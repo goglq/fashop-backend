@@ -15,6 +15,8 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Text;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.BrandImageAggregate;
+using FashopBackend.Core.Aggregate.OrderAggregate;
 using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
@@ -42,8 +44,9 @@ namespace FashopBackend
             services.AddCors(options => options.AddPolicy(name: "AllowAll", builder => 
                 builder
                     .AllowAnyHeader()
-                    .AllowAnyOrigin()
                     .AllowAnyMethod()
+                    .SetIsOriginAllowed(origin => true)
+                    .AllowCredentials()
                 )
             );
             
@@ -64,6 +67,18 @@ namespace FashopBackend
                     };
                 });
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("admin", policy =>
+                {
+                    policy.RequireRole(new[] {"admin"});
+                });
+                options.AddPolicy("user", policy =>
+                {
+                    policy.RequireRole(new[] {"user", "admin"});
+                });
+            });
+
             string dbConnectionString =
                 $"Server={Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost"};" + 
                 $"Port={Environment.GetEnvironmentVariable("DB_PORT") ?? "5432"};" +
@@ -78,7 +93,9 @@ namespace FashopBackend
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IBrandRepository, BrandRepository>();
+            services.AddScoped<IBrandImageRepository, BrandImageRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IProductService, ProductService>();

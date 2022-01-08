@@ -41,6 +41,18 @@ namespace FashopBackend.Graphql
 
         public User GetUser(int id, [Service] IUserRepository repository) => repository.Get(id);
 
+        public User GetSelf([Service] IUserRepository repository, [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new Exception("Http Context is null");
+
+            Console.WriteLine($"refresh token: {httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]}");
+            
+            User user = repository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            return user;
+        }
+
         public string AccessToken(
             [Service] IUserRepository repository, 
             [Service] ITokenService tokenService, 
