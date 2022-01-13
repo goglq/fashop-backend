@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.OrderAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 
@@ -23,6 +25,10 @@ namespace FashopBackend.Infrastructure.Data
         public DbSet<User> Users { get; set; }
         
         public DbSet<Role> Roles { get; set; }
+        
+        public DbSet<Cart> Carts { get; set; }
+        
+        public DbSet<Order> Orders { get; set; }
 
         public FashopContext(DbContextOptions<FashopContext> options) : base(options)
         {

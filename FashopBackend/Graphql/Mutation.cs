@@ -6,23 +6,26 @@ using FashopBackend.Graphql.Categories;
 using FashopBackend.Graphql.Products;
 using HotChocolate;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.BrandImageAggregate;
+using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.OrderAggregate;
 using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.TokenAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
-using FashopBackend.Core.Services;
+using FashopBackend.Core.Error;
 using FashopBackend.Graphql.Brands;
+using FashopBackend.Graphql.Carts;
+using FashopBackend.Graphql.Carts;
+using FashopBackend.Graphql.Orders;
 using FashopBackend.Graphql.Users;
 using FashopBackend.SharedKernel.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using BC = BCrypt.Net.BCrypt;
 
 namespace FashopBackend.Graphql
@@ -139,6 +142,14 @@ namespace FashopBackend.Graphql
 
         public async Task<RegisterUserPayload> RegisterUser(RegsiterUserInput input, [Service] IUserRepository userRepository, [Service]  IRoleRepository roleRepository)
         {
+            var emailValidator = new EmailAddressAttribute();
+
+            if (!emailValidator.IsValid(input.Email))
+                throw new Exception("почта не подходит");
+            
+            if (string.IsNullOrWhiteSpace(input.Password))
+                throw new Exception("заполните пароль");
+
             User candidate = userRepository.GetAll().Find(u => u.Email == input.Email);
             Role role = roleRepository.GetAll().First(u => u.Name == "user");
 
@@ -170,13 +181,21 @@ namespace FashopBackend.Graphql
             [Service] IHttpContextAccessor httpContextAccessor
             )
         {
-            User user = userRepository.GetUsersWithRoles().Find(u => u.Email == input.Email);
+            var emailValidator = new EmailAddressAttribute();
+
+            if (!emailValidator.IsValid(input.Email))
+                throw new Exception("почта не подходит");
             
-            if (user is null) 
-                throw new Exception("Not authorized");
+            if (string.IsNullOrWhiteSpace(input.Password))
+                throw new Exception("заполните пароль");
+            
+            User user = userRepository.GetUsersWithRoles().Find(u => u.Email == input.Email);
+
+            if (user is null)
+                throw new NotRegisteredEmail();
 
             if (!BC.Verify(input.Password, user.Password))
-                throw new Exception("Invalid Password");
+                throw new NotMatchingPasswordException();
 
             Tokens tokens = tokenService.GenerateToken(user.Id, user.Email, user.Role.Name, accessTokenSettings.Value, refreshTokenSettings.Value);
             user.Token = tokens.RefreshToken;
@@ -186,7 +205,12 @@ namespace FashopBackend.Graphql
                 httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokens.RefreshToken,new CookieOptions()
                 {
                     HttpOnly= true,
-                    Expires = DateTimeOffset.Now.AddDays(1)
+                    Expires = DateTimeOffset.Now.AddMonths(4),
+                    //Domain = "*.herokuapp.com",
+                    Secure = true,
+                    MaxAge = new TimeSpan(30, 0, 0, 0),
+                    Path = "/",
+                    SameSite = SameSiteMode.None
                 });
             }
             userRepository.Update(user);
@@ -213,6 +237,96 @@ namespace FashopBackend.Graphql
 
             return new LogoutUserPayload(user.Id);
         }
+
+        #endregion
+
+        #region Cart Mutations
+
+        public AddCartPayload AddCart(AddCartInput input,[Service] ICartRepository cartRepository, [Service] IUserRepository userRepository, [Service] IProductRepository productRepository, [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new NullReferenceException("HttpContext is null");
+
+            IList<Cart> carts = new List<Cart>();
+            
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            foreach (int productId in input.ProductIds)
+            {
+                Product product = productRepository.Get(productId);
+
+                if (product is null)
+                    throw new NullReferenceException("Product not exists");
+                
+                Cart cart = new Cart()
+                {
+                    Count = input.Count,
+                    UserId = user.Id,
+                    ProductId = productId
+                };
+
+                cartRepository.Create(cart);
+                carts.Add(cart);
+            }
+            
+            cartRepository.Save();
+
+            return new AddCartPayload(carts);
+        }
+
+        public DeleteCartPayload DeleteCart(int id, [Service] ICartRepository cartRepository)
+        {
+            Cart cart = cartRepository.Get(id);
+
+            if (cart is null)
+                throw new NullReferenceException("Cart not exists");
+            
+            cartRepository.Remove(cart);
+            cartRepository.Save();
+            return new DeleteCartPayload(id);
+        }
+
+        #endregion
+
+        #region Order Mutations
+
+        public AddOrderPayload AddOrder(AddOrderInput input, [Service] IProductRepository productRepository, [Service] IOrderRepository orderRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new NullReferenceException("HttpContext is null");
+
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            List<Product> products = productRepository.GetAll(product => input.ProductIds.Contains(product.Id));
+
+            Order order = new Order()
+            {
+                Status = input.Status,
+                Address = input.Address,
+                Count = input.Count,
+                UserId = user.Id,
+                Products = products
+            };
+
+            orderRepository.Create(order);
+            orderRepository.Save();
+
+            return new AddOrderPayload(order);
+        }
+        
+        public DeleteOrderPayload DeleteOrder(int id, [Service] IOrderRepository orderRepository)
+        {
+            Order order = orderRepository.Get(id);
+
+            if (order is null)
+                throw new NullReferenceException("Order not exists");
+
+            orderRepository.Remove(order);
+            orderRepository.Save();
+            
+            return new DeleteOrderPayload(id);
+        }
+        
 
         #endregion
     }

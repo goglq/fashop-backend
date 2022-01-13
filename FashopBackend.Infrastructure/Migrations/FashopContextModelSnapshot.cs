@@ -68,6 +68,35 @@ namespace FashopBackend.Infrastructure.Migrations
                     b.ToTable("brand_images");
                 });
 
+            modelBuilder.Entity("FashopBackend.Core.Aggregate.CartAggregate.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("cart");
+                });
+
             modelBuilder.Entity("FashopBackend.Core.Aggregate.CategoryAggregate.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -85,6 +114,38 @@ namespace FashopBackend.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("categories");
+                });
+
+            modelBuilder.Entity("FashopBackend.Core.Aggregate.OrderAggregate.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text")
+                        .HasColumnName("address");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer")
+                        .HasColumnName("count");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("orders");
                 });
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.ProductAggregate.Product", b =>
@@ -223,6 +284,21 @@ namespace FashopBackend.Infrastructure.Migrations
                     b.ToTable("users");
                 });
 
+            modelBuilder.Entity("OrderProduct", b =>
+                {
+                    b.Property<int>("OrdersId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("OrdersId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderProduct");
+                });
+
             modelBuilder.Entity("products_categories", b =>
                 {
                     b.Property<int>("category_id")
@@ -247,6 +323,36 @@ namespace FashopBackend.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("BrandImage");
+                });
+
+            modelBuilder.Entity("FashopBackend.Core.Aggregate.CartAggregate.Cart", b =>
+                {
+                    b.HasOne("FashopBackend.Core.Aggregate.ProductAggregate.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FashopBackend.Core.Aggregate.UserAggregate.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FashopBackend.Core.Aggregate.OrderAggregate.Order", b =>
+                {
+                    b.HasOne("FashopBackend.Core.Aggregate.UserAggregate.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.ProductAggregate.Product", b =>
@@ -280,6 +386,21 @@ namespace FashopBackend.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("OrderProduct", b =>
+                {
+                    b.HasOne("FashopBackend.Core.Aggregate.OrderAggregate.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FashopBackend.Core.Aggregate.ProductAggregate.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("products_categories", b =>

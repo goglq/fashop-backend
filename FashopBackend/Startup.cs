@@ -23,7 +23,9 @@ using FashopBackend.Core.Aggregate.UserAggregate;
 using FashopBackend.Graphql.Errors;
 using FashopBackend.SharedKernel.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
+using FashopBackend.Core.Aggregate.CartAggregate;
 
 namespace FashopBackend
 {
@@ -40,6 +42,12 @@ namespace FashopBackend
         {
             services.Configure<AccessTokenSettings>(Configuration.GetSection("AccessTokenSettings"));
             services.Configure<RefreshTokenSettings>(Configuration.GetSection("RefreshTokenSettings"));
+            
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
             
             services.AddCors(options => options.AddPolicy(name: "AllowAll", builder => 
                 builder
@@ -96,11 +104,13 @@ namespace FashopBackend
             services.AddScoped<IBrandImageRepository, BrandImageRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            
+            services.AddScoped<ICartRepository, CartRepository>();
+
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
 
+            services.AddErrorFilter<GraphQLErrorFilter>();
             services
                 .AddGraphQLServer()
                 .AddQueryType<QueryType>()
@@ -112,8 +122,6 @@ namespace FashopBackend
                 .AddType<ProductType>()
                 .AddFiltering()
                 .AddSorting();
-
-            services.AddErrorFilter<GraphQLErrorFilter>();
 
             services.AddControllers();
 
@@ -133,7 +141,8 @@ namespace FashopBackend
                 //app.UseSwagger();
                 //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FashopBackend v1"));
             }
-
+            app.UseForwardedHeaders();
+            
             app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();

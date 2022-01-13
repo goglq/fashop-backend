@@ -4,6 +4,7 @@ using FashopBackend.Core.Aggregate.ProductAggregate;
 using HotChocolate;
 using HotChocolate.Data;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Authentication;
 using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.TokenAggregate;
@@ -12,16 +13,24 @@ using FashopBackend.Core.Interfaces;
 using FashopBackend.SharedKernel.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.OrderAggregate;
 
 namespace FashopBackend.Graphql
 {
     public class Query
     {
+        #region Products
+
         [UseFiltering]
         [UseSorting]
         public IEnumerable<Product> GetProducts([Service] IProductRepository repository) => repository.GetAll();
 
         public Product GetProduct(int id, [Service]IProductRepository repository) => repository.Get(id);
+
+        #endregion
+
+        #region Categories
 
         [UseFiltering]
         [UseSorting]
@@ -29,11 +38,19 @@ namespace FashopBackend.Graphql
 
         public Category GetCategory(int id, [Service] ICategoryRepository repository) => repository.Get(id);
 
+        #endregion
+
+        #region Brands
+
         [UseFiltering]
         [UseSorting]
         public IEnumerable<Brand> GetBrands([Service] IBrandRepository repository) => repository.GetAll();
 
         public Brand GetBrand(int id, [Service] IBrandRepository repository) => repository.Get(id);
+
+        #endregion
+
+        #region Users
 
         [UseFiltering]
         [UseSorting]
@@ -52,7 +69,10 @@ namespace FashopBackend.Graphql
 
             return user;
         }
+        
+        #endregion
 
+        #region Tokens
         public string AccessToken(
             [Service] IUserRepository repository, 
             [Service] ITokenService tokenService, 
@@ -95,5 +115,35 @@ namespace FashopBackend.Graphql
             }
             return httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
         }
+
+        #endregion
+
+        #region Carts
+        
+        public IEnumerable<Cart> GetCarts([Service] ICartRepository cartRepository)
+        {
+            return cartRepository.GetAll();
+        }
+
+        public Cart GetCart(int id, [Service]ICartRepository cartRepository)
+        {
+            return cartRepository.Get(id);
+        }
+
+        #endregion
+        
+        #region Orders
+        
+        public IEnumerable<Order> GetOrders([Service] IOrderRepository orderRepository)
+        {
+            return orderRepository.GetAll();
+        }
+
+        public Order GetOrder(int id, [Service]IOrderRepository orderRepository)
+        {
+            return orderRepository.Get(id);
+        }
+
+        #endregion
     }
 }

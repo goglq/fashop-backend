@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FashopBackend.Core.Aggregate.ProductAggregate;
@@ -27,8 +28,5 @@ public class Order : IAggregateRoot
     
     public User user { get; set; }
     
-    [Column("product_id")]
-    public int ProductId { get; set; }
-    
-    public Product Product { get; set; }
+    public List<Product> Products { get; set; }
 }
