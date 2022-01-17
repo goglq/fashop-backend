@@ -33,7 +33,5 @@ namespace FashopBackend.Core.Aggregate.ProductAggregate
         public List<Category> Categories { get; set; } = new();
 
         public List<ProductImage> ProductImages { get; set; } = new();
-
-        public List<Order> Orders { get; set; } = new();
     }
 }

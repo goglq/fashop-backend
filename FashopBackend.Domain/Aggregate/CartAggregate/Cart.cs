@@ -8,10 +8,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FashopBackend.Core.Aggregate.OrderAggregate;
 
 namespace FashopBackend.Core.Aggregate.CartAggregate
 {
-    [Table("cart")]
+    [Table("carts")]
     public class Cart : IAggregateRoot
     {
         [Key, Column("id")]
@@ -22,10 +23,17 @@ namespace FashopBackend.Core.Aggregate.CartAggregate
 
         public User User { get; set; }
 
-        [Column("product_id")]
+        [Column("product_id"), Required]
         public int ProductId { get; set; }
 
         public Product Product { get; set; }
+        
+        [Column("count")]
         public int Count { get; set; }
+        
+        [Column("order_id")]
+        public int? OrderId { get; set; }
+        
+        public Order Order { get; set; }
     }
 }

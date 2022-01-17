@@ -4,4 +4,4 @@ using FashopBackend.Core.Aggregate.ProductAggregate;
 
 namespace FashopBackend.Graphql.Carts;
 
-public record AddCartPayload(IEnumerable<Cart> cart);
+public record AddCartPayload(Cart cart);

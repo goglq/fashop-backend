@@ -3,6 +3,7 @@ using System;
 using FashopBackend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FashopBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(FashopContext))]
-    partial class FashopContextModelSnapshot : ModelSnapshot
+    [Migration("20220115110339_added-order-status-table")]
+    partial class addedorderstatustable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,8 +81,7 @@ namespace FashopBackend.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Count")
-                        .HasColumnType("integer")
-                        .HasColumnName("count");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("OrderId")
                         .HasColumnType("integer")
@@ -102,7 +103,7 @@ namespace FashopBackend.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("carts");
+                    b.ToTable("cart");
                 });
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.CategoryAggregate.Category", b =>
@@ -362,7 +363,7 @@ namespace FashopBackend.Infrastructure.Migrations
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer")
-                        .HasColumnName("role_id");
+                        .HasColumnName("roleId");
 
                     b.Property<string>("Token")
                         .HasColumnType("text")

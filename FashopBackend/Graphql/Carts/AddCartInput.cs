@@ -3,4 +3,4 @@ using FashopBackend.Core.Aggregate.ProductAggregate;
 
 namespace FashopBackend.Graphql.Carts;
 
-public record AddCartInput(int Count, IEnumerable<int> ProductIds);
+public record AddCartInput(int Count, int ProductId);

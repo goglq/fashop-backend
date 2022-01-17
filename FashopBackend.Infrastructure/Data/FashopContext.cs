@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.CommercialAggregate;
 using FashopBackend.Core.Aggregate.OrderAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
@@ -29,6 +30,10 @@ namespace FashopBackend.Infrastructure.Data
         public DbSet<Cart> Carts { get; set; }
         
         public DbSet<Order> Orders { get; set; }
+        
+        public DbSet<Commercial> Commercials { get; set; }
+        
+        public DbSet<CommercialType> CommercialTypes { get; set; }
 
         public FashopContext(DbContextOptions<FashopContext> options) : base(options)
         {
@@ -64,6 +69,48 @@ namespace FashopBackend.Infrastructure.Data
             modelBuilder.Entity<Role>().HasData(new Role() { Id = 1, Name = "admin"});
             modelBuilder.Entity<Role>().HasData(new Role() { Id = 2, Name = "user"});
             //modelBuilder.Entity<Role>().HasData(new Role() {Id = 3, Name = "seller"});
+
+            modelBuilder
+                .Entity<Order>()
+                .Property(_ => _.OrderStatusId)
+                .HasConversion<int>();
+            
+            modelBuilder
+                .Entity<OrderStatus>()
+                .Property(_ => _.Id)
+                .HasConversion<int>();
+
+            modelBuilder
+                .Entity<OrderStatus>()
+                .HasData(
+                    Enum.GetValues(typeof(OrderStatusId))
+                        .Cast<OrderStatusId>()
+                        .Select(e => new OrderStatus()
+                        {
+                            Id = e,
+                            Name = e.ToString()
+                        }));
+            
+            modelBuilder
+                .Entity<Commercial>()
+                .Property(e => e.CommercialTypeId)
+                .HasConversion<int>();
+            
+            modelBuilder
+                .Entity<CommercialType>()
+                .Property(e => e.Id)
+                .HasConversion<int>();
+
+            modelBuilder
+                .Entity<CommercialType>()
+                .HasData(
+                    Enum.GetValues(typeof(CommercialTypeId))
+                        .Cast<CommercialTypeId>()
+                        .Select(e => new CommercialType()
+                        {
+                            Id = e,
+                            Name = e.ToString()
+                        }));
         }
 
         public override void Dispose()

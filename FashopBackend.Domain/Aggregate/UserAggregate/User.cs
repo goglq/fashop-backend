@@ -25,7 +25,7 @@ public class User : IAggregateRoot
     [Required, Column("token")]
     public string Token { get; set; }
     
-    [Required, Column("roleId")]
+    [Required, Column("role_id")]
     public int RoleId { get; set; }
     
     public Role Role { get; set; }

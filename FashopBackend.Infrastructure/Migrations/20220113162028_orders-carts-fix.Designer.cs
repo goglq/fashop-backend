@@ -3,6 +3,7 @@ using System;
 using FashopBackend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FashopBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(FashopContext))]
-    partial class FashopContextModelSnapshot : ModelSnapshot
+    [Migration("20220113162028_orders-carts-fix")]
+    partial class orderscartsfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,12 +81,10 @@ namespace FashopBackend.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Count")
-                        .HasColumnType("integer")
-                        .HasColumnName("count");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("OrderId")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer")
@@ -102,7 +102,7 @@ namespace FashopBackend.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("carts");
+                    b.ToTable("cart");
                 });
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.CategoryAggregate.Category", b =>
@@ -124,57 +124,6 @@ namespace FashopBackend.Infrastructure.Migrations
                     b.ToTable("categories");
                 });
 
-            modelBuilder.Entity("FashopBackend.Core.Aggregate.CommercialAggregate.Commercial", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CommercialTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("commercial_type_id");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("text")
-                        .HasColumnName("url");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommercialTypeId");
-
-                    b.ToTable("commercials");
-                });
-
-            modelBuilder.Entity("FashopBackend.Core.Aggregate.CommercialAggregate.CommercialType", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("commercial_types");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 0,
-                            Name = "Grand"
-                        },
-                        new
-                        {
-                            Id = 1,
-                            Name = "Banner"
-                        });
-                });
-
             modelBuilder.Entity("FashopBackend.Core.Aggregate.OrderAggregate.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -188,9 +137,12 @@ namespace FashopBackend.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address");
 
-                    b.Property<int>("OrderStatusId")
-                        .HasColumnType("integer")
-                        .HasColumnName("status_id");
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -198,48 +150,11 @@ namespace FashopBackend.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderStatusId");
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("orders");
-                });
-
-            modelBuilder.Entity("FashopBackend.Core.Aggregate.OrderAggregate.OrderStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("order_statuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 0,
-                            Name = "Confirming"
-                        },
-                        new
-                        {
-                            Id = 1,
-                            Name = "Packing"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Delivering"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Delivered"
-                        });
                 });
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.ProductAggregate.Product", b =>
@@ -362,7 +277,7 @@ namespace FashopBackend.Infrastructure.Migrations
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer")
-                        .HasColumnName("role_id");
+                        .HasColumnName("roleId");
 
                     b.Property<string>("Token")
                         .HasColumnType("text")
@@ -406,7 +321,7 @@ namespace FashopBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.CartAggregate.Cart", b =>
                 {
-                    b.HasOne("FashopBackend.Core.Aggregate.OrderAggregate.Order", "Order")
+                    b.HasOne("FashopBackend.Core.Aggregate.OrderAggregate.Order", null)
                         .WithMany("Carts")
                         .HasForeignKey("OrderId");
 
@@ -422,39 +337,22 @@ namespace FashopBackend.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Order");
-
                     b.Navigation("Product");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FashopBackend.Core.Aggregate.CommercialAggregate.Commercial", b =>
-                {
-                    b.HasOne("FashopBackend.Core.Aggregate.CommercialAggregate.CommercialType", "CommercialType")
-                        .WithMany("Commercials")
-                        .HasForeignKey("CommercialTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CommercialType");
-                });
-
             modelBuilder.Entity("FashopBackend.Core.Aggregate.OrderAggregate.Order", b =>
                 {
-                    b.HasOne("FashopBackend.Core.Aggregate.OrderAggregate.OrderStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("FashopBackend.Core.Aggregate.ProductAggregate.Product", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("ProductId");
 
                     b.HasOne("FashopBackend.Core.Aggregate.UserAggregate.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Status");
 
                     b.Navigation("User");
                 });
@@ -512,11 +410,6 @@ namespace FashopBackend.Infrastructure.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("FashopBackend.Core.Aggregate.CommercialAggregate.CommercialType", b =>
-                {
-                    b.Navigation("Commercials");
-                });
-
             modelBuilder.Entity("FashopBackend.Core.Aggregate.OrderAggregate.Order", b =>
                 {
                     b.Navigation("Carts");
@@ -524,6 +417,8 @@ namespace FashopBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("FashopBackend.Core.Aggregate.ProductAggregate.Product", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("ProductImages");
                 });
 #pragma warning restore 612, 618

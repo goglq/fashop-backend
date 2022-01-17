@@ -120,6 +120,8 @@ namespace FashopBackend
                 .AddType<BrandType>()
                 .AddType<CategoryType>()
                 .AddType<ProductType>()
+                .AddType<CartType>()
+                .AddType<OrderType>()
                 .AddFiltering()
                 .AddSorting();
 

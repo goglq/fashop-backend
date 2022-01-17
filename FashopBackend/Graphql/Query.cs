@@ -125,6 +125,19 @@ namespace FashopBackend.Graphql
             return cartRepository.GetAll();
         }
 
+        public IEnumerable<Cart> GetUserCarts([Service] ICartRepository cartRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new NullReferenceException("HttpContext is null");
+
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            if (user is null)
+                throw new NullReferenceException("User is null");
+            
+            return cartRepository.GetAll(cart => cart.UserId == user.Id);
+        }
+
         public Cart GetCart(int id, [Service]ICartRepository cartRepository)
         {
             return cartRepository.Get(id);

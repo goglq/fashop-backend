@@ -9,5 +9,6 @@ namespace FashopBackend.Core.Aggregate.CartAggregate
 {
     public interface ICartRepository : IRepository<Cart>
     {
+        Cart GetCartByUserAndProductId(int userId, int productId);
     }
 }

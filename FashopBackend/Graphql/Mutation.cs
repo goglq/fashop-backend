@@ -20,7 +20,6 @@ using FashopBackend.Core.Aggregate.UserAggregate;
 using FashopBackend.Core.Error;
 using FashopBackend.Graphql.Brands;
 using FashopBackend.Graphql.Carts;
-using FashopBackend.Graphql.Carts;
 using FashopBackend.Graphql.Orders;
 using FashopBackend.Graphql.Users;
 using FashopBackend.SharedKernel.Shared;
@@ -247,31 +246,40 @@ namespace FashopBackend.Graphql
             if (httpContextAccessor.HttpContext is null)
                 throw new NullReferenceException("HttpContext is null");
 
-            IList<Cart> carts = new List<Cart>();
-            
             User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
 
-            foreach (int productId in input.ProductIds)
-            {
-                Product product = productRepository.Get(productId);
+            if (user is null)
+                throw new NullReferenceException("User is null");
+            
+            Product product = productRepository.Get(input.ProductId);
 
-                if (product is null)
-                    throw new NullReferenceException("Product not exists");
-                
-                Cart cart = new Cart()
+            if (product is null)
+                throw new NullReferenceException("Product not exists");
+
+            
+            Cart cart = cartRepository.GetCartByUserAndProductId(user.Id, product.Id);
+
+            if (cart is not null)
+            {
+                cart.Count++;
+                cartRepository.Update(cart);
+            }
+            else
+            {
+                cart = new Cart()
                 {
                     Count = input.Count,
                     UserId = user.Id,
-                    ProductId = productId
+                    ProductId = product.Id,
                 };
 
                 cartRepository.Create(cart);
-                carts.Add(cart);
             }
+
             
             cartRepository.Save();
 
-            return new AddCartPayload(carts);
+            return new AddCartPayload(cart);
         }
 
         public DeleteCartPayload DeleteCart(int id, [Service] ICartRepository cartRepository)
@@ -290,22 +298,21 @@ namespace FashopBackend.Graphql
 
         #region Order Mutations
 
-        public AddOrderPayload AddOrder(AddOrderInput input, [Service] IProductRepository productRepository, [Service] IOrderRepository orderRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
+        public AddOrderPayload AddOrder(AddOrderInput input, [Service] ICartRepository cartRepository, [Service] IOrderRepository orderRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
         {
             if (httpContextAccessor.HttpContext is null)
                 throw new NullReferenceException("HttpContext is null");
 
             User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
 
-            List<Product> products = productRepository.GetAll(product => input.ProductIds.Contains(product.Id));
-
+            List<Cart> carts = cartRepository.GetAll(cart => input.CartIds.Contains(cart.Id));
+            
             Order order = new Order()
             {
-                Status = input.Status,
+                OrderStatusId = OrderStatusId.Confirming,
                 Address = input.Address,
-                Count = input.Count,
                 UserId = user.Id,
-                Products = products
+                Carts = carts
             };
 
             orderRepository.Create(order);
