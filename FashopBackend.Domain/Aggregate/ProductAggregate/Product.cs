@@ -24,6 +24,9 @@ namespace FashopBackend.Core.Aggregate.ProductAggregate
         
         [Required, Column("price", TypeName = "money")]
         public double Price { get; set; }
+
+        [Required, Column("sale", TypeName = "decimal"), Range(0, 100)]
+        public int Sale { get; set; } = 0;
         
         [Column("brand_id")]
         public int BrandId { get; set; }

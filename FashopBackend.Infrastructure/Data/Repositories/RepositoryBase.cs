@@ -11,7 +11,7 @@ namespace FashopBackend.Infrastructure.Data.Repositories
 {
     public abstract class RepositoryBase<T> : IRepository<T> where T : class, IAggregateRoot
     {
-        private readonly FashopContext _context;
+        protected readonly FashopContext _context;
 
         protected DbSet<T> DbSet { get; }
 

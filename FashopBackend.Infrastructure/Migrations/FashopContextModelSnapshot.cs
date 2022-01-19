@@ -269,6 +269,10 @@ namespace FashopBackend.Infrastructure.Migrations
                         .HasColumnType("money")
                         .HasColumnName("price");
 
+                    b.Property<decimal>("Sale")
+                        .HasColumnType("decimal")
+                        .HasColumnName("sale");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");

@@ -42,6 +42,7 @@ namespace FashopBackend.Graphql
                 Name = input.Name,
                 Description = input.Descriptions,
                 Price = input.Price,
+                Sale = input.Sale,
                 Categories = categories.ToList(),
                 BrandId = input.BrandId,
                 ProductImages = input.ImageUrls.Select(imageUrl => new ProductImage() {Url = imageUrl}).ToList()
@@ -58,7 +59,7 @@ namespace FashopBackend.Graphql
             Brand brand = repository.Get(input.BrandId);
             IEnumerable<ProductImage> productImages =
                 input.ImageUrls.Select(imageUrl => new ProductImage() {Url = imageUrl});
-            Product product = productService.Edit(input.Id, input.Name, input.Descriptions, input.Price, brand, categories, productImages);
+            Product product = productService.Edit(input.Id, input.Name, input.Descriptions, input.Price, input.Sale, brand, categories, productImages);
             return new EditProductPayload(product);
         }
 
@@ -207,7 +208,6 @@ namespace FashopBackend.Graphql
                     Expires = DateTimeOffset.Now.AddMonths(4),
                     //Domain = "*.herokuapp.com",
                     Secure = true,
-                    MaxAge = new TimeSpan(30, 0, 0, 0),
                     Path = "/",
                     SameSite = SameSiteMode.None
                 });

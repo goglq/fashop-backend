@@ -4,8 +4,10 @@ using FashopBackend.Core.Aggregate.ProductAggregate;
 using HotChocolate;
 using HotChocolate.Data;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Authentication;
+using System.Text;
 using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.TokenAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
@@ -15,16 +17,23 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using FashopBackend.Core.Aggregate.CartAggregate;
 using FashopBackend.Core.Aggregate.OrderAggregate;
+using HotChocolate.Types;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FashopBackend.Graphql
 {
     public class Query
     {
         #region Products
-
+        
+        [UsePaging]
         [UseFiltering]
         [UseSorting]
         public IEnumerable<Product> GetProducts([Service] IProductRepository repository) => repository.GetAll();
+        
+        [UsePaging]
+        public IEnumerable<Product> GetRandomProducts([Service] IProductRepository repository) => repository.GetRandomProducts();
 
         public Product GetProduct(int id, [Service]IProductRepository repository) => repository.Get(id);
 
@@ -74,7 +83,7 @@ namespace FashopBackend.Graphql
 
         #region Tokens
         public string AccessToken(
-            [Service] IUserRepository repository, 
+            [Service] IUserRepository userRepository, 
             [Service] ITokenService tokenService, 
             [Service] IOptions<AccessTokenSettings> accessTokenSettings,
             [Service] IOptions<RefreshTokenSettings> refreshTokenSettings,
@@ -87,11 +96,46 @@ namespace FashopBackend.Graphql
             }
             string refreshToken = httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
 
-            User user = repository.GetUserByToken(refreshToken);
+            var jwt = new JwtSecurityTokenHandler();
+
+            jwt.ValidateToken(refreshToken, new TokenValidationParameters()
+            {
+                ValidIssuer = refreshTokenSettings.Value.Issuer,
+                ValidateIssuer = true,
+                ValidAudience = refreshTokenSettings.Value.Audience,
+                ValidateAudience = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(refreshTokenSettings.Value.Key)),
+                ValidateIssuerSigningKey = true
+            }, out SecurityToken validatedToken);
+
+            Console.WriteLine($"token valid to {validatedToken.ValidTo}");
+            Console.WriteLine($"now {DateTime.UtcNow}");
+            Console.WriteLine($"is token still valid {validatedToken.ValidTo > DateTime.UtcNow}");
+            
+            if (validatedToken.ValidTo < DateTime.UtcNow)
+                throw new Exception("refresh token is not valid");
+            
+            User user = userRepository.GetUserByToken(refreshToken);
+            
             if (user is null)
                 throw new AuthenticationException("Refresh Tokens are not matched");
-        
+
             Tokens tokens = tokenService.GenerateToken(user.Id, user.Email, user.Role.Name, accessTokenSettings.Value, refreshTokenSettings.Value);
+            
+            httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokens.RefreshToken,new CookieOptions()
+            {
+                HttpOnly= true,
+                Expires = DateTimeOffset.Now.AddMonths(4),
+                //Domain = "*.herokuapp.com",
+                Secure = true,
+                Path = "/",
+                SameSite = SameSiteMode.None
+            });
+
+            user.Token = tokens.RefreshToken;
+            userRepository.Update(user);
+            userRepository.Save();
+
             return tokens.AccessToken;
         }
 

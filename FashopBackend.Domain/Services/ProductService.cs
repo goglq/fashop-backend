@@ -35,13 +35,14 @@ namespace FashopBackend.Core.Services
             return product;
         }
 
-        public Product Edit(int inputId, string inputName, string description, double price, Brand brand,
+        public Product Edit(int inputId, string inputName, string description, double price, int sale, Brand brand,
             IEnumerable<Category> categories, IEnumerable<ProductImage> productImages)
         {
             Product product = _productRepository.GetIncluded(inputId);
             product.Name = inputName;
             product.Description = description;
             product.Price = price;
+            product.Sale = sale;
             product.Categories.Clear();
             product.Categories.AddRange(categories);
             product.ProductImages.Clear();

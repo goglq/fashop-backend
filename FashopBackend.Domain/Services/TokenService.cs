@@ -25,7 +25,7 @@ public class TokenService : ITokenService
         JwtSecurityToken accessJwtToken = new (
             issuer: accessTokenSettings.Issuer,
             audience: accessTokenSettings.Audience,
-            expires: DateTime.Now.AddHours(4),
+            expires: DateTime.Now.AddHours(1),
             signingCredentials: accessCredentials,
             claims: claims
         );
@@ -33,7 +33,7 @@ public class TokenService : ITokenService
         JwtSecurityToken refreshJwtToken = new (
             issuer: refreshTokenSettings.Issuer,
             audience: refreshTokenSettings.Audience,
-            expires: DateTime.Now.AddMonths(4),
+            expires: DateTime.Now.AddMonths(1),
             signingCredentials: refreshCredentials,
             claims: claims
         );

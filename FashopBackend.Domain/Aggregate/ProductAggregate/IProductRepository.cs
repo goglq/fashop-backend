@@ -11,5 +11,7 @@ namespace FashopBackend.Core.Aggregate.ProductAggregate
     public interface IProductRepository : IRepository<Product>
     {
         Product GetIncluded(int id);
+
+        IEnumerable<Product> GetRandomProducts();
     }
 }
