@@ -26,6 +26,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.CommercialAggregate;
+using FashopBackend.Core.Aggregate.OrderedProductAggregate;
 
 namespace FashopBackend
 {
@@ -104,7 +106,9 @@ namespace FashopBackend
             services.AddScoped<IBrandImageRepository, BrandImageRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderedProductRepository, OrderedProductRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<ICommercialRepository, CommercialRepository>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IProductService, ProductService>();

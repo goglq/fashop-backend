@@ -2,4 +2,4 @@
 
 namespace FashopBackend.Graphql.Orders;
 
-public record AddOrderInput(string Address, IEnumerable<int> CartIds);
+public record AddOrderInput(string Address);

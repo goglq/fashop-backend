@@ -1,7 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using FashopBackend.Core.Aggregate.BrandAggregate;
+using FashopBackend.Core.Aggregate.OrderAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.SharedKernel.Interfaces;
 
@@ -29,4 +32,8 @@ public class User : IAggregateRoot
     public int RoleId { get; set; }
     
     public Role Role { get; set; }
+
+    public List<Brand> Brands { get; set; } = new();
+    
+    public List<Order> Orders { get; set; }
 }

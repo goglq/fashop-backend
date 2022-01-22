@@ -10,6 +10,7 @@ using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.CartAggregate;
 using FashopBackend.Core.Aggregate.CommercialAggregate;
 using FashopBackend.Core.Aggregate.OrderAggregate;
+using FashopBackend.Core.Aggregate.OrderedProductAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 
@@ -31,6 +32,8 @@ namespace FashopBackend.Infrastructure.Data
         
         public DbSet<Order> Orders { get; set; }
         
+        public DbSet<OrderedProduct> OrderedProducts { get; set; }
+
         public DbSet<Commercial> Commercials { get; set; }
         
         public DbSet<CommercialType> CommercialTypes { get; set; }
@@ -50,6 +53,17 @@ namespace FashopBackend.Infrastructure.Data
                 j => j.HasOne<Product>().WithMany().HasForeignKey("product_id"),
                 j => j.HasOne<Category>().WithMany().HasForeignKey("category_id"));
 
+            modelBuilder
+                .Entity<OrderedProduct>()
+                .HasKey(table => new {table.OrderId, table.ProductId});
+
+            modelBuilder.Entity<Category>()
+                .HasData(new Category() {Id = 1, Name = "Одежда"});
+            modelBuilder.Entity<Category>()
+                .HasData(new Category() {Id = 2, Name = "Техника"});
+            modelBuilder.Entity<Category>()
+                .HasData(new Category() {Id = 3, Name = "Для кухни"});
+
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
@@ -68,7 +82,6 @@ namespace FashopBackend.Infrastructure.Data
 
             modelBuilder.Entity<Role>().HasData(new Role() { Id = 1, Name = "admin"});
             modelBuilder.Entity<Role>().HasData(new Role() { Id = 2, Name = "user"});
-            //modelBuilder.Entity<Role>().HasData(new Role() {Id = 3, Name = "seller"});
 
             modelBuilder
                 .Entity<Order>()

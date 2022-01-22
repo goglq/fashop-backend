@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.OrderedProductAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 using FashopBackend.SharedKernel.Interfaces;
@@ -18,6 +19,9 @@ public class Order : IAggregateRoot
     [Column("address")]
     public string Address { get; set; }
     
+    [Column("total_price", TypeName = "money")]
+    public decimal TotalPrice { get; set; }
+    
     [Column("status_id")]
     public OrderStatusId OrderStatusId { get; set; }
     
@@ -28,5 +32,5 @@ public class Order : IAggregateRoot
     
     public User User { get; set; }
     
-    public List<Cart> Carts { get; set; }
+    public List<OrderedProduct> OrderedProducts { get; set; }
 }

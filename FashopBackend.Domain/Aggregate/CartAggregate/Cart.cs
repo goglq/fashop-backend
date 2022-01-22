@@ -30,10 +30,5 @@ namespace FashopBackend.Core.Aggregate.CartAggregate
         
         [Column("count")]
         public int Count { get; set; }
-        
-        [Column("order_id")]
-        public int? OrderId { get; set; }
-        
-        public Order Order { get; set; }
     }
 }

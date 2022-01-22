@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FashopBackend.Core.Aggregate.BrandImageAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
+using FashopBackend.Core.Aggregate.UserAggregate;
 using FashopBackend.SharedKernel.Interfaces;
 
 namespace FashopBackend.Core.Aggregate.BrandAggregate;
@@ -22,4 +23,9 @@ public class Brand : IAggregateRoot
     public int BrandImageId { get; set; }
 
     public BrandImage BrandImage { get; set; } = new BrandImage();
+
+    [Required, Column("user_id")]
+    public int UserId { get; set; }
+    
+    public User User { get; set; }
 }

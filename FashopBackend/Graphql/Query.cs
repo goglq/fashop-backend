@@ -16,6 +16,7 @@ using FashopBackend.SharedKernel.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using FashopBackend.Core.Aggregate.CartAggregate;
+using FashopBackend.Core.Aggregate.CommercialAggregate;
 using FashopBackend.Core.Aggregate.OrderAggregate;
 using HotChocolate.Types;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,6 +35,12 @@ namespace FashopBackend.Graphql
         
         [UsePaging]
         public IEnumerable<Product> GetRandomProducts([Service] IProductRepository repository) => repository.GetRandomProducts();
+
+        public IEnumerable<Product> SearchProducts(string text, [Service] IProductRepository repository)
+        {
+            string textLower = text.ToLower();
+            return repository.GetAll(product => product.Name.ToLower().Contains(textLower) || product.Description.ToLower().Contains(textLower));
+        }
 
         public Product GetProduct(int id, [Service]IProductRepository repository) => repository.Get(id);
 
@@ -54,6 +61,19 @@ namespace FashopBackend.Graphql
         [UseFiltering]
         [UseSorting]
         public IEnumerable<Brand> GetBrands([Service] IBrandRepository repository) => repository.GetAll();
+
+        public IEnumerable<Brand> GetUserBrands([Service] IBrandRepository brandRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new Exception("HttpContext is null");
+            
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            if (user is null)
+                throw new Exception("Пользователь не авторизован");
+            
+            return brandRepository.GetAll(brand => brand.UserId == user.Id);
+        }
 
         public Brand GetBrand(int id, [Service] IBrandRepository repository) => repository.Get(id);
 
@@ -196,9 +216,33 @@ namespace FashopBackend.Graphql
             return orderRepository.GetAll();
         }
 
+        public IEnumerable<Order> GetUserOrders(
+            [Service] IOrderRepository orderRepository,
+            [Service] IUserRepository userRepository, 
+            [Service] IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor.HttpContext is null)
+                throw new NullReferenceException("HttpContext is null");
+            
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+
+            return orderRepository.GetAll(order => order.UserId == user.Id);
+        }
+
         public Order GetOrder(int id, [Service]IOrderRepository orderRepository)
         {
             return orderRepository.Get(id);
+        }
+
+        #endregion
+
+        #region Commercials
+
+        [UsePaging]
+        public IEnumerable<Commercial> GetCommercials([Service] ICommercialRepository commercialRepository)
+        {
+            return commercialRepository.GetAll();
         }
 
         #endregion

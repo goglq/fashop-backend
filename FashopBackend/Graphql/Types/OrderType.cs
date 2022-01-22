@@ -2,6 +2,7 @@
 using System.Linq;
 using FashopBackend.Core.Aggregate.CartAggregate;
 using FashopBackend.Core.Aggregate.OrderAggregate;
+using FashopBackend.Core.Aggregate.OrderedProductAggregate;
 using FashopBackend.Core.Aggregate.ProductAggregate;
 using FashopBackend.Core.Aggregate.UserAggregate;
 using HotChocolate;
@@ -20,10 +21,15 @@ public class OrderType : ObjectType<Order>
         descriptor
             .Field(_ => _.User)
             .Resolve(ctx => resolvers.GetUser(ctx.Parent<Order>(), ctx.Service<IUserRepository>()));
+        
+        descriptor
+            .Field(_ => _.Status)
+            .Resolve(ctx => resolvers.GetOrderStatus(ctx.Parent<Order>(), ctx.Service<IOrderRepository>()));
 
         descriptor
-            .Field(_ => _.Carts)
-            .Resolve(ctx => resolvers.GetCarts(ctx.Parent<Order>(), ctx.Service<ICartRepository>()));
+            .Field(_ => _.OrderedProducts)
+            .Resolve(ctx =>
+                resolvers.GetOrderedProducts(ctx.Parent<Order>(), ctx.Service<IOrderedProductRepository>()));
     }
 
     private class Resolvers
@@ -33,9 +39,14 @@ public class OrderType : ObjectType<Order>
             return userRepository.Get(order.UserId);
         }
 
-        public IEnumerable<Cart> GetCarts(Order order, [Service] ICartRepository cartRepository)
+        public OrderStatus GetOrderStatus(Order order, [Service] IOrderRepository orderRepository)
         {
-            return cartRepository.GetAll(cart => cart.Order.Id == order.Id);
+            return orderRepository.GetStatusIncluded(order.Id).Status;
+        }
+        
+        public IEnumerable<OrderedProduct> GetOrderedProducts(Order order, [Service] IOrderedProductRepository orderedProductRepository)
+        {
+            return orderedProductRepository.GetProductIncluded(orderedProduct => orderedProduct.OrderId == order.Id);
         }
     }
 }

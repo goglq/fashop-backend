@@ -13,6 +13,7 @@ using FashopBackend.Core.Aggregate.BrandAggregate;
 using FashopBackend.Core.Aggregate.BrandImageAggregate;
 using FashopBackend.Core.Aggregate.CartAggregate;
 using FashopBackend.Core.Aggregate.OrderAggregate;
+using FashopBackend.Core.Aggregate.OrderedProductAggregate;
 using FashopBackend.Core.Aggregate.ProductImageAggregate;
 using FashopBackend.Core.Aggregate.RoleAggregate;
 using FashopBackend.Core.Aggregate.TokenAggregate;
@@ -33,8 +34,42 @@ namespace FashopBackend.Graphql
     {
         #region Product Mutations
 
-        public async Task<AddProductPayload> AddProduct(AddProductInput input, [Service] IProductService productService, [Service] ICategoryService categoryService)
+        public async Task<AddProductPayload> AddProduct(
+            AddProductInput input, 
+            [Service] IProductService productService, 
+            [Service] ICategoryService categoryService, 
+            [Service] IBrandRepository brandRepository,
+            [Service] ICategoryRepository categoryRepository,
+            [Service] IUserRepository userRepository,
+            [Service] IHttpContextAccessor httpContextAccessor)
         {
+            if (httpContextAccessor.HttpContext is null)
+                throw new Exception("HttpContext is null");
+            
+            if (string.IsNullOrWhiteSpace(input.Name))
+                throw new Exception("Название товара не может быть пустым.");
+            
+            if (input.Price < 0)
+                throw new Exception("Цена товара не может быть отрицательным числом.");
+
+            Brand brand = brandRepository.Get(input.BrandId);
+
+            if (brand is null)
+                throw new Exception("Такого бренда не существует.");
+
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            if (brand.UserId != user.Id)
+                throw new Exception("Бренд вам не принадлежит");
+            
+            IList<Category> category = categoryRepository.GetAll(category => input.CategoryIds.Contains(category.Id));
+
+            if (category.Count <= 0)
+                throw new Exception("Каталога нет.");
+
+            if (!input.ImageUrls.Any())
+                throw new Exception("Добавьте хотя бы одно изображение товара");
+
             IEnumerable<Category> categories = categoryService.GetByIds(input.CategoryIds.ToArray());
 
             Product product = new Product()
@@ -45,7 +80,7 @@ namespace FashopBackend.Graphql
                 Sale = input.Sale,
                 Categories = categories.ToList(),
                 BrandId = input.BrandId,
-                ProductImages = input.ImageUrls.Select(imageUrl => new ProductImage() {Url = imageUrl}).ToList()
+                ProductImages = input.ImageUrls.Where(imageUrl => !string.IsNullOrWhiteSpace(imageUrl)).Select(imageUrl => new ProductImage() {Url = imageUrl}).ToList()
             };
 
             await productService.Create(product);
@@ -101,11 +136,29 @@ namespace FashopBackend.Graphql
 
         #region Brand Mutations
 
-        public async Task<AddBrandPayload> AddBrand(AddBrandInput input, [Service] IBrandRepository repository)
+        public async Task<AddBrandPayload> AddBrand(AddBrandInput input, [Service] IBrandRepository brandRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
         {
-            Brand brand = new Brand()
+            if (httpContextAccessor.HttpContext is null)
+                throw new NullReferenceException("HttpContext is null");
+
+            if (string.IsNullOrWhiteSpace(input.Name))
+                throw new Exception("название бренда не может быть пустым");
+            if (string.IsNullOrWhiteSpace(input.Header))
+                throw new Exception("ссылка на баннер не может быть пустым");
+            if (string.IsNullOrWhiteSpace(input.Thumbnail))
+                throw new Exception("ссылка на превью не может быть пустым");
+            
+            User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
+
+            Brand brand = brandRepository.GetByName(input.Name);
+
+            if (brand is not null)
+                throw new Exception("бренд с таким названием уже существует");
+
+            Brand newBrand = new Brand()
             {
                 Name = input.Name,
+                UserId = user.Id,
                 BrandImage = new BrandImage()
                 {
                     Thumbnail = input.Thumbnail,
@@ -113,10 +166,10 @@ namespace FashopBackend.Graphql
                 }
             };
             
-            await repository.Create(brand);
-            await repository.SaveAsync();
+            await brandRepository.Create(newBrand);
+            await brandRepository.SaveAsync();
             
-            return new AddBrandPayload(brand);
+            return new AddBrandPayload(newBrand);
         }
 
         public EditBrandPayload EditBrand(EditBrandInput input, [Service] IBrandRepository repository)
@@ -300,21 +353,36 @@ namespace FashopBackend.Graphql
 
         public AddOrderPayload AddOrder(AddOrderInput input, [Service] ICartRepository cartRepository, [Service] IOrderRepository orderRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
         {
+            
             if (httpContextAccessor.HttpContext is null)
                 throw new NullReferenceException("HttpContext is null");
 
             User user = userRepository.GetUserByToken(httpContextAccessor.HttpContext.Request.Cookies["refreshToken"]);
 
-            List<Cart> carts = cartRepository.GetAll(cart => input.CartIds.Contains(cart.Id));
+            List<Cart> carts = cartRepository.GetAllIncluded(cart => cart.User.Id == user.Id).ToList();
+
+            if (carts.Count <= 0)
+                throw new Exception("No Carts");
             
+            //TODO: Реализовать добавление заказанных товаров
             Order order = new Order()
             {
                 OrderStatusId = OrderStatusId.Confirming,
                 Address = input.Address,
                 UserId = user.Id,
-                Carts = carts
+                TotalPrice = Math.Ceiling(carts.Select(cart => (cart.Product.Price - cart.Product.Sale * 0.01m * cart.Product.Price) * cart.Count).Sum()),
+                OrderedProducts = carts
+                    .Select(cart => new OrderedProduct()
+                    {
+                        Count = cart.Count,
+                        ProductId = cart.ProductId,
+                    }).ToList()
             };
-
+            
+            foreach(Cart cart in carts)
+                cartRepository.Remove(cart);
+            cartRepository.Save();
+            
             orderRepository.Create(order);
             orderRepository.Save();
 

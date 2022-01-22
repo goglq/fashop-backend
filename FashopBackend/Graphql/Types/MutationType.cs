@@ -9,29 +9,23 @@ public class MutationType : ObjectType<Mutation>
         base.Configure(descriptor);
 
         descriptor
-            .Field(_ => _.AddBrand(default, default))
-            .Authorize();
+            .Field(_ => _.AddBrand(default, default, default, default));
 
         descriptor
-            .Field(_ => _.EditBrand(default, default))
-            .Authorize();
-        
-        descriptor
-            .Field(_ => _.DeleteBrand(default, default))
-            .Authorize();
+            .Field(_ => _.EditBrand(default, default));
 
         descriptor
-            .Field(_ => _.AddProduct(default, default, default))
-            .Authorize();
-        
+            .Field(_ => _.DeleteBrand(default, default));
+
         descriptor
-            .Field(_ => _.EditProduct(default, default, default, default))
-            .Authorize();
-        
+            .Field(_ => _.AddProduct(default, default, default, default, default, default, default));
+
         descriptor
-            .Field(_ => _.DeleteProduct(default, default))
-            .Authorize();
-        
+            .Field(_ => _.EditProduct(default, default, default, default));
+
+        descriptor
+            .Field(_ => _.DeleteProduct(default, default));
+
         descriptor
             .Field(_ => _.AddCategory(default, default))
             .Authorize("admin");

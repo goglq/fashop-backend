@@ -18,7 +18,7 @@ namespace FashopBackend.Core.Interfaces
 
         Task<Product> Create(Product product);
         
-        Product Edit(int inputId, string inputName, string description, double price, int sale, Brand brand,
+        Product Edit(int inputId, string inputName, string description, decimal price, int sale, Brand brand,
             IEnumerable<Category> categories, IEnumerable<ProductImage> productImages);
         
         int Delete(int inputId);
