@@ -16,8 +16,29 @@ public class Order : IAggregateRoot
     [Key, Column("id")]
     public int Id { get; set; }
 
-    [Column("address")]
-    public string Address { get; set; }
+    [Column("city"), Required]
+    public string City { get; set; }
+    
+    [Column("street"), Required]
+    public string Street { get; set; }
+    
+    [Column("building"), Required]
+    public string Building { get; set; }
+    
+    [Column("section")]
+    public string Section { get; set; }
+    
+    [Column("housing")]
+    public string Housing { get; set; }
+    
+    [Column("post_index"), Required]
+    public string PostIndex { get; set; }
+    
+    [Column("name"), Required]
+    public string Name { get; set; }
+    
+    [Column("surname"), Required]
+    public string Surname { get; set; }
     
     [Column("total_price", TypeName = "money")]
     public decimal TotalPrice { get; set; }

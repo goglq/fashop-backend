@@ -11,14 +11,8 @@ public class GraphQLErrorFilter : IErrorFilter
             return error;
 
         if (error.Exception is NotRegisteredEmail)
-        {
-            error
-                .WithMessage(error.Exception.Message)
-                .WithCode("NOT_AUTH");
-        }
-        
-        //error.WithMessage(error.Exception.Message);
+            return ErrorBuilder.FromError(error).SetMessage(error.Exception.Message).SetCode("NOT_AUTH").Build();
 
-        return error;
+        return ErrorBuilder.FromError(error).SetMessage(error.Exception.Message).Build();
     }
 }

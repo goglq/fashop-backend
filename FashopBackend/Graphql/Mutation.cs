@@ -26,6 +26,7 @@ using FashopBackend.Graphql.Users;
 using FashopBackend.SharedKernel.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 using BC = BCrypt.Net.BCrypt;
 
 namespace FashopBackend.Graphql
@@ -207,7 +208,7 @@ namespace FashopBackend.Graphql
             Role role = roleRepository.GetAll().First(u => u.Name == "user");
 
             if (candidate is not null)
-                throw new Exception("User already exists");
+                throw new Exception("пользователь уже существует");
 
             string hashedPassword = BC.HashPassword(input.Password);
 
@@ -353,6 +354,23 @@ namespace FashopBackend.Graphql
 
         public AddOrderPayload AddOrder(AddOrderInput input, [Service] ICartRepository cartRepository, [Service] IOrderRepository orderRepository, [Service] IUserRepository userRepository, [Service] IHttpContextAccessor httpContextAccessor)
         {
+            if (string.IsNullOrWhiteSpace(input.City))
+                throw new Exception("Заполните город");
+            
+            if (string.IsNullOrWhiteSpace(input.Street))
+                throw new Exception("Заполните улицу");
+            
+            if (string.IsNullOrWhiteSpace(input.Building))
+                throw new Exception("Заполните номер дома");
+
+            if (string.IsNullOrWhiteSpace(input.PostIndex))
+                throw new Exception("Заполните почтовый индекс");
+            
+            if (string.IsNullOrWhiteSpace(input.Name))
+                throw new Exception("Заполните имя");
+            
+            if (string.IsNullOrWhiteSpace(input.Surname))
+                throw new Exception("Заполните фамилию");
             
             if (httpContextAccessor.HttpContext is null)
                 throw new NullReferenceException("HttpContext is null");
@@ -362,13 +380,20 @@ namespace FashopBackend.Graphql
             List<Cart> carts = cartRepository.GetAllIncluded(cart => cart.User.Id == user.Id).ToList();
 
             if (carts.Count <= 0)
-                throw new Exception("No Carts");
+                throw new Exception("Нет товаров в корзине");
             
             //TODO: Реализовать добавление заказанных товаров
             Order order = new Order()
             {
                 OrderStatusId = OrderStatusId.Confirming,
-                Address = input.Address,
+                City = input.City,
+                Street = input.Street,
+                Building = input.Building,
+                Section = input.Section,
+                Housing = input.Housing,
+                PostIndex = input.PostIndex,
+                Name = input.Name,
+                Surname = input.Surname,
                 UserId = user.Id,
                 TotalPrice = Math.Ceiling(carts.Select(cart => (cart.Product.Price - cart.Product.Sale * 0.01m * cart.Product.Price) * cart.Count).Sum()),
                 OrderedProducts = carts
